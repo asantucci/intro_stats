@@ -1,0 +1,180 @@
+\documentclass[12pt]{article}  \usepackage{algorithm2e} \usepackage{amsmath} \usepackage{amsthm} \usepackage{amsfonts} \usepackage{bbm} \usepackage{color,soul} \usepackage{framed} \usepackage[margin=0.5in]{geometry} \usepackage{hyperref} \usepackage{mathtools} \usepackage[dvipsnames]{xcolor}  \newtheorem{theorem}{Theorem}[section] \newtheorem{lemma}[theorem]{Lemma} \newtheorem{proposition}[theorem]{Proposition} \newtheorem{corollary}[theorem]{Corollary}  \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil} \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor} \DeclareMathOperator*{\argmin}{arg\,min} \DeclareMathOperator*{\argmax}{arg\,max} \newcommand{\D}{\mathrm{d}} \SetKwInput{KwInput}{Input} \SetKwInput{KwOutput}{Output}  \begin{document}
+
+\title{\textbf{Tenants of Probability}}
+\author{Andreas Santucci}
+\date{August 2017}
+\maketitle
+
+\section{Introduction to Probability}
+Basic concepts of probability are more easily explained in a finite state space.
+There is a finite set
+\[
+\mathcal S = \{s_1, \ldots, s_M\}
+\]
+whose elements are are said to be \emph{elementary events}. 
+A \emph{probability measure} assigns a real number $P(s)$ to each state $s \in S$.
+One and only one of the states will occur, and that's reflected in the probabilities being
+non-negative and summing to one.
+
+\begin{align*}   \Pr(s_j) \geq 0, \hspace{25pt} \sum_{j=1}^M \Pr(s_j) = 1. \end{align*}
+
+An \emph{event} $A$ is a subset of state-space $S$, and it is said to occur if it contains the state that occurs. I.e.
+\[
+\Pr(A) = \sum_{s \in A} \Pr(s).
+\]
+
+A \emph{random variable} is a mapping from the state-space to the real-numbers. Its expectation is 
+formed by a weighted average,
+\[
+\mathbb E[Y] = \sum_{j=1}^{M} Y(s_j) \Pr(s_j).
+\]
+
+We have the \emph{law of total probability},
+\[
+\Pr(A) = \sum_{j} \Pr(A|B_j) \Pr(B_j)
+\]
+where $\{B_i\}$ forms a partition of $\mathcal S$, i.e. $\cup_j B_j = \mathcal S$ and $B_i \cap B_j = \emptyset$.
+
+\section{Weak law of large numbers}
+Let $\{X_n : n \geq 1\}$ be a sequence of i.i.d. random variables with
+$\mathbb E[|X|] < \infty$. Then, the sample mean converges in probability to the first moment.
+Let's prove this result from the ground up.
+
+\subsection{Statement of the Theorem} We are given $X_1, X_2, \ldots, X_n$ independent
+and identically distributed RVs where $\Pr(X_j \leq x) = F(X)$ denotes 
+their common cumulative distribution function. Suppose that $E[X_i]=\mu$
+and $\textrm{var}(X_i) = \sigma^2$, then the \emph{weak law states that}
+ $\Pr(|\bar{X}_n - \mu| > \delta) \longrightarrow 0$ for any $\delta > 0$,
+as $n \uparrow \infty$; i.e.
+``with high probability, $\bar{X}_n$ close to $\mu$''. 
+On the other hand, the \emph{strong law states that} $\bar{X}_n \longrightarrow \mu$ with probability 1; i.e.
+``with a single experiment, if we run it long enough, we \emph{will get} $\mu$''. 
+
+\paragraph{Sample Mean} We are interested in the sample (empirical) mean,
+\[
+\bar{X}_n = \frac{X_1 + X_2 + \ldots + X_n}{n}.
+\]
+
+We expect that the sample mean should be closely related to the theoretical mean $\mu = E[X_j]$. We denote the \emph{variance} of $X_j$ by
+\[
+\sigma^2 = \textrm{var}(X_j) = E\big[ (X_j - \mu)^2 \big] = \int_{\mathbb R} (x-\mu)^2 d F(x).
+\]
+
+\subsection{Markov's Inequality} If $X$ is a non-negative random variable
+and $a > 0$, then
+\[
+\Pr(X \geq a) \leq \frac{E[X]}{a}.
+\]
+
+\begin{proof}   Given $a > 0$, and non-negative $X$,
+  \[
+    a \mathbbm 1\{X \geq a\} \leq X
+  \]
+  is clearly true (consider the two cases when $X \geq a$ and $X < a$).
+  Note that $E[\cdot]$ is a monotone-increasing function, hence
+  \[
+    E\left[ a \mathbbm 1\{X \geq a\} \right] \leq E[X].
+  \]
+  By linearity of expectation, we may re-express $E\left[ a \mathbbm 1\{X \geq a\} \right]$ as
+  \[
+    a E\left[ \mathbbm 1\{X \geq a\} \right] = a \cdot \Pr(X \geq a) + 0 \cdot \Pr(X < a) = a \Pr(X \geq a). 
+  \]
+  Hence
+  \[
+    a \Pr(X \geq a) \leq E[X].
+  \]
+  Since $a > 0$, dividing both sides by $a$ yields the final result. \end{proof}
+
+\subsection{Chebyshev's Inequality} is of the form
+\begin{align*}
+\Pr(|X-\mu| > \delta) &\leq \frac{E \left[ |X - \mu|^p \right]}{\delta^p}, \, \, &\delta > 0, \, \, \hspace{5pt} 0 < p < \infty.
+\end{align*}
+
+\begin{proof}   
+\ul{Using the definition of variance},
+\begin{align*}     
+  \sigma^2 &= \textrm{var}(X) = \int_{-\infty}^\infty (t - \mu)^2 f_X(t) dt \\
+           &\geq \int_{-\infty}^{\mu - \epsilon} (t - \mu)^2 f_X(t) dt + \int_{\mu + \epsilon}^\infty (t- \mu)^2 f_X(t) dt,   
+\end{align*}
+  where the last inequality follows from the fact that $f_X(t)$ non-negative, and $(t-\mu)^2$ also non-negative, hence $\left((t-\mu)^2f_X(t)\right)$
+non-negative for all $t$. Hence by restricting the range over which we integrate a positive function, we yield a lower-bound. Then, this is
+\[
+\geq \int_{-\infty}^{\mu - \epsilon} \epsilon^2 f_X(t) dt + \int_{\mu + \epsilon}^\infty \epsilon^2 f_X(t) dt,
+\]
+since $t \leq \mu - \epsilon \implies \epsilon \leq |t-\mu| \implies \epsilon^2 \leq (t-\mu)^2$. When we re-arrange, and apply the definition of the density function, we see that
+\begin{align*}   &= \epsilon^2 \left(\int_{-\infty}^{\mu - \epsilon} f_X(t) dt + \int_{\mu + \epsilon}^{\infty} f_X(t) dt \right) \\
+  &= \epsilon^2 \Pr(X \leq \mu - \epsilon \textrm{ OR } X \geq \mu + \epsilon) \\
+  &= \epsilon^2 \Pr \left( |x - \mu| \geq \epsilon \right).  \end{align*}
+Hence,
+\[
+  \sigma^2 \geq \epsilon^2 \Pr(|X-\mu| \geq \epsilon),
+\]
+where dividing through by $\epsilon^2$ yields the desired result. 
+\end{proof}
+
+\paragraph{Weak Law of Large Numbers} The WLLN states that $\bar{X}_n \overset{p}{\longrightarrow} \mu$ as $n \uparrow \infty$, i.e. the sample average 
+\ul{converges in probability} to the true average. This follows from Chebyschev's Inequality,
+\[
+\Pr(|\bar{X}_n - \mu| > \delta) \leq \frac{E \big[ (\bar{X}_n - \mu)^2 \big]}{\delta^2} = \frac{\sigma^2}{n\delta^2} \longrightarrow 0
+\]
+as $n \uparrow \infty$ for all $\delta > 0$. We use the fact that $\bar{X}_n$ converges to $\mu$ also in mean-square, i.e. $E\big[ (\bar{X}_n - \mu)^2 \big] \longrightarrow 0$.
+
+\begin{proof}   By Chebyschev's Inequality,
+  \[
+    \Pr(|\bar{X}_n - \mu| > \delta) \leq \frac{1}{\delta^2} E\left[ |\bar{X}_n - \mu|^2 \right].
+  \]
+  Notice that
+  \begin{alignat*}{5}     
+    E\left[ |\bar{X}_n - \mu|^2 \right]
+    &= E \left[ \left(\frac{x_1 + x_2 + \ldots + x_n}{n} - \mu \right)^2 \right] \\
+    &= E \left[ \left( \frac{(x_1 - \mu) + \ldots + (x_n - \mu)}{n}\right)^2 \right] \\
+    &= \frac{1}{n^2} E \left[ \sum_{i=1}^n \sum_{j=1}^n (x_i - \mu) (x_j - \mu) \right] \\
+    &= \frac{1}{n^2} \sum_{i} \sum_{j} E \left[ (x_i - \mu) (x_j - \mu)\right] \\
+    &= \frac{1}{n^2} \sum_i E[(x_i-\mu)^2] \hspace{15pt} \textrm{Since } \textrm{cov}(X_i,X_j)=0\\
+    &= \frac{1}{n^2} \sum_i \textrm{var}(x_i) \\
+    &= \frac{1}{n^2} \textrm{var}(X), \hspace{25pt} \textrm{ where } \textrm{var}(X) < \infty. \end{alignat*}
+
+We used the fact that if two random variables $X,Y$ are independent,
+then $\textrm{cov}(X,Y) = 0$.
+
+Hence, as $n\longrightarrow \infty$,
+\[
+\Pr( |\bar{X}_n - \mu| > \delta) \leq \frac{\textrm{var}(X)}{\delta^2 n} \longrightarrow 0,
+\]
+for \emph{any} $\delta > 0$. \end{proof}
+
+\paragraph{What if $\pmb{\textrm{var}(X) = + \infty}$?} We can still get to the same result, but we can no longer use Chebyschev's inequality to get there.
+
+\paragraph{What if $\pmb{\{x_j\}}$ dependent?} The result does not hold. There are many counter examples. Suppose all $x_j$ the same. Then the result clearly
+does not follow. Hence we need some sort of approximate independence,
+i.e. $X_j$ must be sufficiently uncorrelated.
+
+\section{Estimation}
+We next show some examples of analytically computing estimators.
+
+\subsection{Maximum likelihood estimation}
+
+\subsection{Bayesian estimation}
+
+\section{Properties of Estimators}
+We cover several finite sample properties of estimators before delving into their asymptotic properties.
+\subsection{Finite sample properties}
+\subsection{Asymptotic properties} 
+\section{Statistical Inference}
+Lastly, we investigate the cornerstone of statistical inference: the hypothesis test. \subsection{Hypothesis testing} \subsection{Confidence intervals}
+
+
+\bibliographystyle{plain}
+\begin{thebibliography}{10}
+\bibitem{clain: ec2120}
+G. Chamberlain.
+\newblock {\em Econometrics 2120}.
+\newblock Harvard University, Winter 2017.
+
+\bibitem{papa: 308}
+G. Papanicalou.
+\newblock {\em CME 308: Stochastic Processes}.
+\newblock Stanford University, Spring 2016.
+
+\end{thebibliography}
+  \end{document}
