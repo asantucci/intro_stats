@@ -1,5 +1,57 @@
-\documentclass[12pt]{article}  \usepackage{algorithm2e} \usepackage{amsmath} \usepackage{amsthm} \usepackage{amsfonts} \usepackage{bbm} \usepackage{color,soul} \usepackage{framed} \usepackage[margin=0.5in]{geometry} \usepackage{hyperref} \usepackage{mathtools} \usepackage[dvipsnames]{xcolor} 
-\usepackage{tikz} \newtheorem{theorem}{Theorem}[section] \newtheorem{lemma}[theorem]{Lemma} \newtheorem{proposition}[theorem]{Proposition} \newtheorem{corollary}[theorem]{Corollary}  \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil} \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor} \DeclareMathOperator*{\argmin}{arg\,min} \DeclareMathOperator*{\argmax}{arg\,max} \newcommand{\D}{\mathrm{d}} \SetKwInput{KwInput}{Input} \SetKwInput{KwOutput}{Output}  \begin{document}
+\documentclass[12pt]{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}  \usepackage{algorithm2e} \usepackage{amsmath} \usepackage{amsthm} \usepackage{amsfonts} \usepackage{bbm} \usepackage{color,soul} \usepackage{framed} \usepackage[margin=0.5in]{geometry} \usepackage{hyperref} \usepackage{mathtools} \usepackage[dvipsnames]{xcolor} 
+\usepackage{tikz} \newtheorem{theorem}{Theorem}[section] \newtheorem{lemma}[theorem]{Lemma} \newtheorem{proposition}[theorem]{Proposition} \newtheorem{corollary}[theorem]{Corollary}  \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil} \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor} \DeclareMathOperator*{\argmin}{arg\,min} \DeclareMathOperator*{\argmax}{arg\,max} \newcommand{\D}{\mathrm{d}} \SetKwInput{KwInput}{Input} \SetKwInput{KwOutput}{Output}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
 
 \title{\textbf{Tenants of Probability}}
 \author{Andreas Santucci}
@@ -266,59 +318,116 @@ Hence for all $\delta > 0$,
 Does this imply that $\hat \theta_n = \argmax_{|\theta - \theta^*| \leq a} \ell_n(\theta) \overset{P}{\longrightarrow} \theta^*$?
 Yes! \href{http://projecteuclid.org/euclid.aoms/1177729952}{Wald (1948)}.
 
-% \paragraph{Asymptotic Distribution of MLE}
-% What about the asymptotic distribution of MLE? Let $\hat \theta_n = \theta^* + \frac{Z_n}{\sqrt n}$, i.e. $Z_n = \sqrt n (\hat \theta_n - \theta^*)$.
+\subsubsection{Applying MLE in R}
+Let's see how we can apply what we've learned in our favorite programming language, R!
 
-% \begin{theorem}   $Z_n \overset{\mathcal D}{\longrightarrow} \mathcal N \left(0, \frac{1}{I(\theta^*)}\right)$. \end{theorem}
-% Note that $\hat \theta_n$ is \emph{not} a summation, it's a max.
-% How can we apply CLT?
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{### For use of the `%>%` operator.}
+\hlkwd{require}\hlstd{(magrittr)}
 
-% \paragraph{Delta Method} Start with $\ell'_n(\hat \theta_n) = 0$, which
-% is a fact we derived. We also know that $\ell'(\theta^*)=0$.\hl{Why}
-% We may rewrite this as
-% \[
-% 0 = \ell'_n(\hat \theta_n) = \ell'_n(\theta^* + \frac{Z_n}{\sqrt n}) = \ell_n'(\theta^*) + \ell''_n(\tilde{\theta}_n) \frac{Z_n}{\sqrt n},
-% \]
-% for $\tilde{\theta_n}$ between $\theta^*$ and $\hat \theta_n$. Hence
-% by consistency, $\tilde{ \theta_n} \overset{P}{\longrightarrow} \theta^*$.
+\hlcom{### Simply a normal density. Also built-in to R: see dnorm.}
+\hlstd{MyDensity} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{,} \hlkwc{mu} \hlstd{=} \hlnum{0}\hlstd{,} \hlkwc{ss} \hlstd{=} \hlnum{1}\hlstd{)}
+    \hlnum{1}\hlopt{/}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{pi}\hlopt{*}\hlstd{ss)} \hlopt{*} \hlkwd{exp}\hlstd{(}\hlopt{-}\hlstd{(mu}\hlopt{-}\hlstd{x)}\hlopt{^}\hlnum{2}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{ss))}
 
-% Now, we solve for $Z_n$, yielding
+\hlcom{### Returns minus the log-likelihood of a normally distributed RV.}
+\hlstd{LL} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{beta}\hlstd{,} \hlkwc{response}\hlstd{,} \hlkwc{data}\hlstd{)}
+    \hlopt{-}\hlnum{1} \hlopt{*} \hlkwd{MyDensity}\hlstd{(response} \hlopt{-} \hlstd{(data} \hlopt{%>%} \hlstd{as.matrix)} \hlopt{%*%} \hlstd{beta)} \hlopt{%>%} \hlstd{log} \hlopt{%>%} \hlstd{sum}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
-% \[
-% Z_n = \frac{\sqrt n \ell'_n(\theta^*)}{- \ell_n''(\tilde{\theta_n})},
-% \] 
-% where
-% \[
-% \ell_n'(\theta^*) = \frac{1}{n} \sum_{j=1}^n \frac{f'(x_j|\theta^*)}{f(x_j|\theta^*)}.
-% \]
+\paragraph{Simulating Data}
+Now that we've defined our functions, let's simulate some data.
 
-% Since $\Bbb E [ \ell'(\theta)] = 0$, then $\textrm{var}(\ell'(\theta)) = I(\theta)$. (\hl{no star?}) So,
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{N} \hlkwb{<-} \hlnum{10}
+\hlstd{P} \hlkwb{<-} \hlnum{2}
+\hlstd{X} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwd{rnorm}\hlstd{(P}\hlopt{*}\hlstd{N),} \hlkwc{nrow} \hlstd{= N)}
+\hlstd{Y} \hlkwb{<-} \hlkwd{runif}\hlstd{(N)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
-% \[
-% \sqrt n (\ell_n'(\theta^*) \overset{\mathcal D}{\longrightarrow} \mathcal N (0, I(\theta^*),
-% \]
-% and
-% \[
-% \ell''(\theta) = \frac{1}{n}\sum_{j=1}^n \left( \frac{f''(x_j|\theta^*)}{f(x_j|\theta^*)} - \frac{(f'(x_j|\theta^*))^2}{f^2(x_j|\theta^*)}\right) \overset{\textrm{WLLN}}{\longrightarrow} - I(\theta^*).
-% \]
+\paragraph{Running a regression}
+Great, now we run a regression and compare the results.
 
-% Hence by \emph{Slutsky}'s theorem,
-% \[
-% Z_n = \frac{\sqrt n \ell_n'(\theta^*)}{-\ell''_n(\tilde \theta_n)} \overset{\mathcal D}{\longrightarrow} \frac{1}{I} \mathcal{N} (0,I) = \mathcal N (0, \frac{1}{I}).
-% \]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{m} \hlkwb{<-} \hlkwd{optim}\hlstd{(}\hlkwc{par} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{'beta'} \hlstd{=} \hlkwd{rep}\hlstd{(}\hlnum{0}\hlstd{,} \hlkwd{ncol}\hlstd{(X))),} \hlkwc{fn} \hlstd{= LL,} \hlkwc{response} \hlstd{= Y,} \hlkwc{data} \hlstd{= X)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
-% \section{Properties of Estimators}
-% We cover several finite sample properties of estimators before delving into % their asymptotic properties.
-% \subsection{Finite sample properties}
-% We define the \emph{bias} of an estimator $\hat \theta$ as
-% \[
-% \textrm{Bias}_\theta\left(\hat \theta \right) = \mathbb E[\hat \theta ] - \theta.
-% \]
+\paragraph{Determining Correctness}
+We verify that our regression well set-up.
 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{m}\hlopt{$}\hlstd{par} \hlopt{-} \hlkwd{lm}\hlstd{(Y} \hlopt{~} \hlnum{0} \hlopt{+} \hlstd{X)}\hlopt{$}\hlstd{coef} \hlopt{<} \hlnum{1e-3}
+\end{alltt}
+\begin{verbatim}
+## beta1 beta2 
+##  TRUE  TRUE
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
-% \subsection{Asymptotic properties} 
-% An estimator $\hat \theta_n$ is consistent if $\hat \theta_n \overset{P}{\longrightarrow} \theta$
-% for all $\theta \in\ Theta$.
+\section{Bootstrapping confidence intervals}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{require}\hlstd{(MASS)}  \hlcom{# For dataset: Boston.}
+\hlstd{N} \hlkwb{<-} \hlkwd{nrow}\hlstd{(Boston)}
+
+\hlcom{### Run one model.}
+\hlstd{model} \hlkwb{<-} \hlkwd{lm}\hlstd{(crim} \hlopt{~} \hlstd{tax} \hlopt{+} \hlstd{medv,} \hlkwc{data} \hlstd{= Boston)}
+
+\hlcom{### Run a series of models, each time bootstrapping a coefficient.}
+\hlstd{coefs} \hlkwb{<-} \hlkwd{replicate}\hlstd{(}\hlnum{1e4}\hlstd{,} \hlkwc{expr} \hlstd{= \{}
+    \hlkwd{lm}\hlstd{(crim} \hlopt{~} \hlstd{tax} \hlopt{+} \hlstd{medv,} \hlkwc{data} \hlstd{= Boston[}\hlkwd{sample}\hlstd{(}\hlnum{1}\hlopt{:}\hlstd{N,} \hlkwc{replace} \hlstd{= T), ])}\hlopt{$}\hlstd{coef[}\hlstr{'tax'}\hlstd{]}
+\hlstd{\})}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+With our statistics in hand, we're ready to bootstrap an estimated confidence interval for one of our coefficients.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-6-1} 
+
+\end{knitrout}
+
+\section{Permutation Testing}
+Let's examine whether there's a relationship between \texttt{distance} traveled
+and \texttt{speed} in our \texttt{Cars} dataset.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{tru.model} \hlkwb{<-} \hlkwd{lm}\hlstd{(speed} \hlopt{~} \hlstd{dist,} \hlkwc{data} \hlstd{= cars)}
+
+\hlstd{stats} \hlkwb{<-} \hlkwd{replicate}\hlstd{(}\hlnum{1e4}\hlstd{,} \hlkwc{expr} \hlstd{= \{}
+    \hlstd{prmtd} \hlkwb{<-} \hlkwd{sample}\hlstd{(}\hlnum{1}\hlopt{:}\hlkwd{nrow}\hlstd{(cars),} \hlkwc{replace} \hlstd{= F)}
+    \hlkwd{lm}\hlstd{(speed} \hlopt{~} \hlkwd{I}\hlstd{(dist[prmtd]),} \hlkwc{data} \hlstd{= cars)}\hlopt{$}\hlstd{coef}
+\hlstd{\})}
+\hlstd{stats} \hlkwb{<-} \hlstd{stats[}\hlnum{2}\hlstd{, ]}  \hlcom{# Fix attention to slope-coefficient only.}
+
+\hlcom{### Estimated p-value of observing data at least as extreme.}
+\hlkwd{mean}\hlstd{(}\hlkwd{abs}\hlstd{(tru.model}\hlopt{$}\hlstd{coef[}\hlstr{'dist'}\hlstd{])} \hlopt{>=} \hlkwd{abs}\hlstd{(stats))}
+\end{alltt}
+\begin{verbatim}
+## [1] 1
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
 \section{Statistical Inference}
 Lastly, we investigate the cornerstone of statistical inference: the hypothesis test. \subsection{Hypothesis testing} \subsection{Confidence intervals}
@@ -347,6 +456,17 @@ Thomas S. Ferguson
 Abraham Wald.
 \newblock {\em Note on the consistency of the maximum likelihood estimate}.
 \newblock Annals of Mathematical Statistics, 1949.
+
+\bibitem{islr: intro stat learning}
+James et. al.
+\newblock {\em An introduction to statistical learning}.
+\newblock Springer 2017.
+
+
+\bibitem{bstr: bstrapefron}
+Bradley Efron.
+\newblock {\em Bootstrap methods: another look at the jackknife}.
+\newblock Annals of Statistics, 1979.
 
 \end{thebibliography}
   \end{document}
