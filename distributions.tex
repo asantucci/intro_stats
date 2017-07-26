@@ -76,6 +76,8 @@ An \emph{event} $A$ is a subset of state-space $S$, and it is said to occur if i
 \Pr(A) = \sum_{s \in A} \Pr(s).
 \]
 
+We take as axiom the following rule of conditional probability, 
+$\Pr(A,B) = \Pr(A) \cdot \Pr(B | A)$.
 A \emph{random variable} is a mapping from the state-space to the real-numbers. Its expectation is 
 formed by a weighted average,
 \[
@@ -156,7 +158,7 @@ non-negative for all $t$. Hence by restricting the range over which we integrate
 \]
 since $t \leq \mu - \epsilon \implies \epsilon \leq |t-\mu| \implies \epsilon^2 \leq (t-\mu)^2$. When we re-arrange, and apply the definition of the density function, we see that
 \begin{align*}   &= \epsilon^2 \left(\int_{-\infty}^{\mu - \epsilon} f_X(t) dt + \int_{\mu + \epsilon}^{\infty} f_X(t) dt \right) \\
-  &= \epsilon^2 \Pr(X \leq \mu - \epsilon \textrm{ OR } X \geq \mu + \epsilon) \\
+  &= \epsilon^2 \Pr(X \leq \mu - \epsilon \lor X \geq \mu + \epsilon) \\
   &= \epsilon^2 \Pr \left( |x - \mu| \geq \epsilon \right).  \end{align*}
 Hence,
 \[
@@ -202,8 +204,60 @@ for \emph{any} $\delta > 0$. \end{proof}
 does not follow. Hence we need some sort of approximate independence,
 i.e. $X_j$ must be sufficiently uncorrelated.
 
+\section{Motivating least squares}
+We have a response variable and some relevant explanatory variables.
+It would be nice if there were a true function mapping our explanatory variables
+to a particular and correct value of the response. We'll assume such a function exists, and
+therefore that $y \sim f(X)$. Since we don't
+know the functional form of $f$, we instead hope to approximate it via a linear model,
+$y \sim X\beta + \epsilon$. 
+But how do we determine our fitted-coefficients, $\hat \beta$? It's natural to define
+goodness of fit in terms of prediction error; we'll use the $\ell$-2 norm.
+\[
+  \hat \beta = \argmin_{\beta} \| y - X \beta \|_2^2 = \argmin_\beta \sum_{i=1}^n \left(y_i - \beta_0 - \beta_1 x_{i1} - \ldots - \beta_p x_{ip}\right)^2.
+\]
+
+Our least squares estimate falls out immediately.
+
+\[
+  \hat \beta = \argmin_{\beta} \|y - X\beta\|^2 = \argmin_\beta (y - X \beta)^T (y - X \beta) = \argmin_\beta -2\beta^T X^T y + \beta^T X^T X \beta \implies \hat \beta = (X^TX)^{-1} X^T y 
+\]
+
+This is enough to write a short program to solve for least-squares from scratch. 
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{rSquare} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{y}\hlstd{,} \hlkwc{yhat}\hlstd{,} \hlkwc{intercept}\hlstd{)} \hlkwa{if} \hlstd{(intercept)} \hlkwd{cor}\hlstd{(y, yhat)}\hlopt{^}\hlnum{2} \hlkwa{else} \hlkwd{sum}\hlstd{(yhat}\hlopt{^}\hlnum{2}\hlstd{)}\hlopt{/}\hlkwd{sum}\hlstd{(y}\hlopt{^}\hlnum{2}\hlstd{)}
+
+\hlstd{sigmaSquare} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{residuals}\hlstd{,} \hlkwc{p}\hlstd{)} \hlkwd{sum}\hlstd{(residuals}\hlopt{^}\hlnum{2}\hlstd{)} \hlopt{/} \hlstd{(}\hlkwd{length}\hlstd{(residuals)} \hlopt{-} \hlstd{p)}
+
+\hlstd{linearRegression} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{y}\hlstd{,} \hlkwc{x}\hlstd{,} \hlkwc{intercept} \hlstd{= T,} \hlkwc{alpha} \hlstd{=} \hlkwa{NULL}\hlstd{) \{}
+    \hlstd{x} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(x)}  \hlcom{# Ensure matrix operations available.}
+    \hlkwa{if} \hlstd{(}\hlopt{!}\hlkwd{is.null}\hlstd{(alpha)) y} \hlkwb{<-} \hlstd{y} \hlopt{-} \hlstd{alpha}
+    \hlkwa{if} \hlstd{(intercept)       x} \hlkwb{<-} \hlkwd{cbind}\hlstd{(}\hlnum{1}\hlstd{, x)}
+    \hlstd{xpx.inv} \hlkwb{<-} \hlkwd{solve}\hlstd{(}\hlkwd{t}\hlstd{(x)} \hlopt{%*%} \hlstd{x)}
+    \hlstd{beta}    \hlkwb{<-} \hlstd{xpx.inv} \hlopt{%*%} \hlkwd{t}\hlstd{(x)} \hlopt{%*%} \hlstd{y}
+    \hlstd{yhat}    \hlkwb{<-} \hlstd{x} \hlopt{%*%} \hlstd{beta}
+    \hlstd{sigma.square}   \hlkwb{<-} \hlkwd{sigmaSquare}\hlstd{(y}\hlopt{-}\hlstd{yhat,} \hlkwd{ncol}\hlstd{(x))}
+    \hlkwd{rownames}\hlstd{(beta)} \hlkwb{<-} \hlkwd{paste0}\hlstd{(}\hlstr{'B'}\hlstd{,} \hlnum{1}\hlopt{:}\hlkwd{length}\hlstd{(beta)} \hlopt{-} \hlstd{intercept)}
+    \hlkwd{list}\hlstd{(}\hlstr{'coefficients'} \hlstd{= beta,}
+         \hlstr{'covariance'}   \hlstd{= xpx.inv} \hlopt{*} \hlstd{sigma.square,}
+         \hlstr{'fitted'}       \hlstd{= yhat,}
+         \hlstr{'residuals'}    \hlstd{= y} \hlopt{-} \hlstd{yhat,}
+         \hlstr{'rsq'}          \hlstd{=} \hlkwd{rSquare}\hlstd{(y, yhat, intercept))}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+But for statistical inference, we'll need to know more about the distributional results of our estimator. More on that later. For now, it's enough to consider the assumption
+that $\epsilon \sim \mathcal N(0, I_n)$, i.e. that our error term is normally distributed with
+no correlation between observations (i.e. independent) and some constant variance. Why might this
+assumption be reasonable? In reality, it's not the most reasonable, but it makes our model mathematically tractable.
+
 \section{Estimation}
-We next show some examples of analytically computing estimators.
+We next show derive some theory behind a common type of estimator.
 
 \subsection{Maximum likelihood estimation}
 
@@ -227,8 +281,6 @@ from our estimator $\hat \theta_n$?
 we want our estimator to go to the right value.
 
 (2) Efficiency: We also want our estimator to get to the right value as fast as possible.
-(Leap of Faith) Suppose the following statement were true:
-
 \emph{If} we have the asymptotic result that
   $\sqrt n (\hat \theta_n - \theta^*) \overset{ \mathcal D}{\longrightarrow} \mathcal N (0, \sigma^2)$,
 \emph{then} $\sigma^2$ is the smallest possible among consistent estimators.
@@ -238,7 +290,7 @@ We draw $X_1, X_2, \ldots, X_n$ i.i.d. sample from $f(x|\theta^*)$.
 We are given the data, we do not know $\theta^*$.
 We assume Regularity Conditions such as differentiability of 
 $f(x|\theta)$ with respect to $\theta$.
-Examine the Likelihood Functionz,
+Examine the Likelihood Function,
 \[
 L_n(\theta) = f(x_1|\theta) f(x_2|\theta) \ldots f(x_n|\theta),
 \]
@@ -248,7 +300,7 @@ $x_i$ drawn i.i.d. from $f(x|\theta)$. Let
 \hat \theta_n = \argmax_{\theta \in \Theta} L_n(\theta).
 \]
 
-Notice that $\log$ a monotone transforms, and $f(x_j)$ non-negative,
+Notice that $\log$ is a monotone transform, and $f(x_j)$ non-negative,
 hence $\prod_{k=1}^n f(x_k)$ non-negative. Then,
 
 \[
@@ -401,7 +453,7 @@ With our statistics in hand, we're ready to bootstrap an estimated confidence in
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-6-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-7-1} 
 
 \end{knitrout}
 
@@ -433,6 +485,28 @@ and \texttt{speed} in our \texttt{Cars} dataset.
 Lastly, we investigate the cornerstone of statistical inference: the hypothesis test. \subsection{Hypothesis testing} \subsection{Confidence intervals}
 
 \section{Homework/Practice}
+\section{Problem \#0} 
+%% Write an R function which samples the elements from the following  table with
+%% their corresponding probabilities.
+%% \begin{table}
+%%   & A & B & C \\
+%%   \textrm{Probability} & 0.4 & 0.3 & 0.1
+%% \end{table}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{## MySample <- function(tbl, n) \{}
+\hlcom{##     replicate(n, expr = \{}
+\hlcom{##         prob <- cumsum(tbl)}
+\hlcom{##         coin <- runif(1)}
+\hlcom{##         names(tbl)[which.min(prob >= coin & coin <= prob)]}
+\hlcom{##     \})}
+\hlcom{## \}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
  \section*{Problem \#1}  \paragraph{Question} A target is made of 3 concentric circles of radii $1/\sqrt{3}$, 1, and $\sqrt{3}$ feet. Shots within the inner circle are given 4 points, shots within the next ring are given 3 points, and shots within the third ring are given 2 points. Shouts outside the target are given 0 points.  Let $X$ denote the distance of the hit from the center (in feet), and let the p.d.f. of $X$ be  \[ f(x) = \frac{2}{\pi (1 + x^2)} \boldsymbol{1}\{x > 0\} \]  What is the expected value of the score of a single shot?  \paragraph{Solution} Using the definition of the expectation of a discrete-valued random variable, we have that  \begin{align*} \mathbb E[\text{single shot}] &= \sum_{x \in X} x \cdot \Pr(X = x) \\  &= 0 \cdot \Pr(X > \sqrt{3}) + 2 \cdot \Pr(1 < X < \sqrt{3}) + 3 \cdot \Pr(\frac{1}{\sqrt{2}} < X < 1) + 4 \cdot \Pr(X < \frac{1}{\sqrt{3}}) \end{align*}  The solution is simple once we solve for the c.d.f. of our random variable $X$. By definition,  \[ F(x) = \int_0^x f(x) dx = \int_0^x \frac{2}{\pi(1 + x^2)} dx \]  Recall that when $\sin \theta$ and $\cos \theta$ are defined using a unit circle, the $(x,y)$ point which lay on the unit circle is given by $(\cos \theta, \sin \theta)$, where $\theta$ denotes the angle from the origin.  Therefore, by the Pythagorean theorem, we have the identity that $\sin^2 \theta + \cos^2 \theta = 1$, since we can describe any point on the unit circle by a (possible degenerate) right triangle. We may then derive that  \begin{align*} \sin^2 \theta + \cos^2 \theta &= 1 \\ \frac{\sin^2 \theta}{\cos^2 \theta} + \frac{\cos^2\theta}{\cos^2 \theta} &= \frac{1}{\cos^2 \theta} \\ \tan^2 \theta + 1 &= \sec^2 \theta \end{align*}  This informs how we may use $u$-substitution to solve for our c.d.f. Let $x = \tan \theta$. Then,  \begin{align*} \frac{d}{d \theta} \tan \theta &= \frac{d}{d \theta} \frac{\sin \theta}{\cos \theta} \\  &= \frac{d}{d \theta} \sin \theta \cos^{-1} \theta \\  &= \frac{\cos \theta}{\cos \theta} + \frac{-\sin \theta}{\cos^2 \theta} \cdot (-\sin \theta) \\  &= \frac{\cos^2 \theta + \sin^2 \theta}{\cos^2 \theta} \\ &= \frac{1}{\cos^2 \theta} \\ &= \sec^2 \theta \end{align*}  If $x = \tan \theta$, then $\theta = \arctan x$, and further  \[ \frac{dx}{d\theta} = \sec^2 \theta \implies dx = \sec^2 \theta d \theta. \]  This is great because we can use $u$-substitution to reduce our integral to something very simple:  \[ \int \frac{1}{1 + x^2}dx = \int \frac{1}{\sec^2 \theta} \sec^2 \theta d\theta = \int d \theta = \theta + C \]  Therefore,  \begin{align*} \frac{2}{\pi} \int_0^x  \frac{1}{1+x^2}dx &= \frac{2}{\pi} \arctan x \bigg |_0^x = \frac{2}{\pi} \arctan x \end{align*}  Note that $\arctan 0 = 0$ and  $\underset{x \to \infty}{\lim} \arctan x \to \pi/2$, so that  $F(0) = 0$ and $\underset{x \to \infty}{\lim} F(x) \to 1$, which is how we expect our c.d.f. to behave for this random variable.  Now,  \begin{align*} \mathbb{E}[\text{single shot}] &= \sum_{x \in X} x \cdot \Pr(X = x) \\  &= 0 \cdot \Pr(X > \sqrt{3}) + 2 \cdot \Pr(1 < X < \sqrt{3}) + 3 \cdot \Pr(\frac{1}{\sqrt{2}} < X < 1) + 4 \cdot \Pr(X < \frac{1}{\sqrt{3}}) \\ &= 2 \bigg( F(\sqrt{3}) - F(1) \bigg) + 3 \bigg(F(1) - F(1/\sqrt{3}) \bigg) + 4 F(1/\sqrt{3}) \\ &\approx 3.403  \end{align*}  \section*{Problem \#2}   \paragraph{Question} Assume that the random variable $X$ has the exponential distribution  \[ f(x|\theta) = \theta e^{-\theta x} \boldsymbol{1}\{x > 0, \theta > 0\} \]  where $\theta$ is the parameter of the distribution. Use the method of maximum likelihood to estimate $\theta$ is 5 observations of $X$ are $x_1 = 0.9$, $x_2 = 1.7$, $x_3 = 0.4$, $x_4 = 0.3$, and $x_5 = 2.4$ are generated independent and identically distributed.  \paragraph{Answer} We are told that  \[ x_1, \ldots, x_n \overset{i.i.d.}{\sim} \textrm{exp} (\theta) \]  By independence, we have that  \[ f(x_1, \ldots, x_n | \theta_1, \ldots, \theta_n) = \prod_{i=1}^n f(x_i|\theta_i) \]  and by identically distributed, we have that  \[ \prod_{i=1}^n f(x_i) = \theta e^{-\theta x_i} \]  Therefore,  \[ f(x_1, \ldots, x_n|\theta) = \prod_{i=1}^n \theta e^{- \theta x_i} = \theta^n e^{-\theta \sum_i x_i} \]  Our likelihood function is given by  \[ L(\theta|x_1, \ldots, x_n) = \theta^n e^{-\theta \sum_i x_i}. \]  Maximizing a monotonic increasing transformation of the likelihood is the same as maximizing the likelihood, so to make life easier we take the log-likelihood:  \[ \lg L(\theta|x_1, \ldots, x_n) = n \lg \theta - \theta \sum_i x_i \]  Maximizing this by taking the derivative and setting it to zero shows that   \begin{align*} \frac{d}{d \theta} \lg L(\theta |x_1, \ldots, x_n) = \frac{n}{\theta} - \sum_i x_i &= 0 \\ \frac{n}{\theta} &= \sum_i x_i \\ \implies \hat{\theta}_{\text{mle}} &= \frac{n}{\sum_i x_i} \end{align*}  In other words, our maximum likelihood estimator for our parameter $\theta$ is simply the reciprocal of the sample mean. Note that we can convince ourselves that we have found a true maximum by taking the second derivative of our likelihood function and checking that it is concave, yielding  $\frac{d}{d \theta} \frac{n}{\theta} - \sum_i x_i = \frac{-n}{\theta^2}$, which is an upside down parabola and therefore has a single maximum point.  If $x = (0.9, 1.7, 0.4, 0.3, 2.4)$, then $\sum_i x_i = 5.7$, and $\bar{x} = 57/50 = 1.14$. Therefore, we see that  \[ \hat{\theta}_{\text{mle}} = \frac{1}{\bar{x}} = \frac{1}{1.14} \approx 0.877. \] 
 
 \bibliographystyle{plain}
@@ -467,6 +541,11 @@ James et. al.
 Bradley Efron.
 \newblock {\em Bootstrap methods: another look at the jackknife}.
 \newblock Annals of Statistics, 1979.
+
+\bibitem{fin: finetti}
+Bruno de Finetti.
+\newblock {\em Theory of Probability}.
+\newblock 1970, Wiley.
 
 \end{thebibliography}
   \end{document}
