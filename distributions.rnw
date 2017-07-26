@@ -1,4 +1,5 @@
-\documentclass[12pt]{article}  \usepackage{algorithm2e} \usepackage{amsmath} \usepackage{amsthm} \usepackage{amsfonts} \usepackage{bbm} \usepackage{color,soul} \usepackage{framed} \usepackage[margin=0.5in]{geometry} \usepackage{hyperref} \usepackage{mathtools} \usepackage[dvipsnames]{xcolor} 
+\documentclass[12pt]{article}  
+\usepackage[linesnumbered]{algorithm2e} \usepackage{amsmath} \usepackage{amsthm} \usepackage{amsfonts} \usepackage{bbm} \usepackage{color,soul} \usepackage{framed} \usepackage[margin=0.5in]{geometry} \usepackage{hyperref} \usepackage{mathtools} \usepackage[dvipsnames]{xcolor} 
 \usepackage{tikz} \newtheorem{theorem}{Theorem}[section] \newtheorem{lemma}[theorem]{Lemma} \newtheorem{proposition}[theorem]{Proposition} \newtheorem{corollary}[theorem]{Corollary}  \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil} \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor} \DeclareMathOperator*{\argmin}{arg\,min} \DeclareMathOperator*{\argmax}{arg\,max} \newcommand{\D}{\mathrm{d}} \SetKwInput{KwInput}{Input} \SetKwInput{KwOutput}{Output}  \begin{document}
 
 \title{\textbf{Tenants of Probability}}
@@ -128,12 +129,12 @@ as $n \uparrow \infty$ for all $\delta > 0$. We use the fact that $\bar{X}_n$ co
   \]
   Notice that
   \begin{alignat*}{5}     
-    E\left[ |\bar{X}_n - \mu|^2 \right]
-    &= E \left[ \left(\frac{x_1 + x_2 + \ldots + x_n}{n} - \mu \right)^2 \right] \\
-    &= E \left[ \left( \frac{(x_1 - \mu) + \ldots + (x_n - \mu)}{n}\right)^2 \right] \\
-    &= \frac{1}{n^2} E \left[ \sum_{i=1}^n \sum_{j=1}^n (x_i - \mu) (x_j - \mu) \right] \\
-    &= \frac{1}{n^2} \sum_{i} \sum_{j} E \left[ (x_i - \mu) (x_j - \mu)\right] \\
-    &= \frac{1}{n^2} \sum_i E[(x_i-\mu)^2] \hspace{15pt} \textrm{Since } \textrm{cov}(X_i,X_j)=0\\
+    \mathbb E\left[ |\bar{X}_n - \mu|^2 \right]
+    &= \mathbb E \left[ \left(\frac{x_1 + x_2 + \ldots + x_n}{n} - \mu \right)^2 \right] \\
+    &= \mathbb E \left[ \left( \frac{(x_1 - \mu) + \ldots + (x_n - \mu)}{n}\right)^2 \right] \\
+    &= \frac{1}{n^2} \mathbb E \left[ \sum_{i=1}^n \sum_{j=1}^n (x_i - \mu) (x_j - \mu) \right] \\
+    &= \frac{1}{n^2} \sum_{i} \sum_{j} \mathbb E \left[ (x_i - \mu) (x_j - \mu)\right] \\
+    &= \frac{1}{n^2} \sum_i \mathbb E[(x_i-\mu)^2] \hspace{15pt} \textrm{Since } \textrm{cov}(X_i,X_j)=0\\
     &= \frac{1}{n^2} \sum_i \textrm{var}(x_i) \\
     &= \frac{1}{n^2} \textrm{var}(X), \hspace{25pt} \textrm{ where } \textrm{var}(X) < \infty. \end{alignat*}
 
@@ -173,7 +174,18 @@ Our least squares estimate falls out immediately.
 
 This is enough to write a short program to solve for least-squares from scratch. 
 
-<<>>=
+\paragraph{Homework exercise: write a short R program to solve for least-squares from scratch} You are allowed to use R's \texttt{solve} command to invert a matrix.\footnote{This is, in practice, a bad idea for reasons relating to numerical stability.}
+
+<<echo=F>>=
+linearRegression <- function(y, x, intercept = T) 
+    list('coefficients' = NA,  # These are for you
+         'covariance'   = NA,  # to fill in...
+         'fitted'       = NA,  # after performing some
+         'residuals'    = NA,  # computations above...
+         'rsq'          = NA)  # Have fun!
+@ 
+
+<<echo=T>>=
 
 rSquare <- function(y, yhat, intercept) if (intercept) cor(y, yhat)^2 else sum(yhat^2)/sum(y^2)
 
@@ -389,12 +401,89 @@ We verify that our regression well set-up.
 m$par - lm(Y ~ 0 + X)$coef < 1e-3
 @ 
 
-\section{Bootstrapping confidence intervals}
+
+\section{Hypothesis testing} Asdf
+
+\subsection{Sign Tests}
+Suppose 10 patients were given treatment for a disease, and their survival times reported in weeks.
+One patient outlived the study. The survival times were
+
+<<>>=
+surv <- c(49, 58, 75, 110, 112, 132, 151, 276, 281, 362)
+@ 
+
+Where we caveat that the last observation represents the censored patient who was still
+alive at the end of the 362 week study. We ask ourselves: was the median survival time less than or greater than 200 weeks? The null hypothesis is that median survival is 200 weeks.
+
+We create a new series of data by comparing each existing observation with 200;
+we output a \texttt{-} or \texttt{+} correspondingly. We now reframe our question:
+if the median survival time was 200 weeks, how many $\pm$'s would you expect to see?
+Under the null, the number of \texttt{-}'s will have a binomial distribution with probability of success $p=1/2$. So, the probability of observing data at least as extreme as we did is given by
+\[
+\Pr(\# \texttt{-} = k) = \binom{n}{k} \frac{1}{2^k} \frac{1}{2^{n-k}} 
+\]
+In our data, we observe 7 out of 10 observations less than 200. Under the null,
+the probability of observing an outcome at least as extreme as we did is given by
+\[
+  \sum_{\substack{k=1 \\ k \neq 4,5,6}}^{10} \Pr(\# \texttt{-} = k) = \frac{1}{2}^{10} \sum_{k \in \{0,1,2,3,7,8,9,10\}} \binom{10}{k} \approx 0.3438.
+\]
+
+
+To see this in R,
+
+<<>>=
+
+### Remember, we're interested in a two-tail test.
+nck <- choose(10, c(0:3, 7:10))
+1/2^(10) * sum(nck)
+
+@ 
+
+We can do this a bit more simply, using R's built-in functions.
+
+<<>>=
+binom.test(x = 7, n = 10, p = 0.5, alternative = 'two.sided')
+@ 
+
+This is well and good, but what if we don't know the distribution of our test-statistic?
+E.g. above we knew that if the median survival rate was 200 weeks, then it would be ``like a coin-toss'' whether an observation met the threshold. However, this took insight. When we don't know
+the distribution of the test-statistic, we need to have a non-parametric test.
+
+\subsection{Permutation Testing}
+Let's examine whether there's a relationship between \texttt{distance} traveled
+and \texttt{speed} in our \texttt{Cars} dataset. How can we go about this?
+Well, if there was no relationship between the two variables, then permuting one
+and not the other should leave the relationship unchanged. To get a measure of
+how likely it is to observe the relationship we do, conditional on there being
+no true relationship, we can apply a \emph{permutation test}.
+
+\begin{algorithm}
+  Compute a test statistic between $k$ groups, e.g. a difference of means \\
+  Randomly shuffle the data assigned to each group \\
+  Measure the test-statistic on the shuffled data \\
+  Repeat steps 2 and 3 many times \\
+  Compare the test-statistic from step 1 to those obtained in steps  2-3
+\end{algorithm}
+<<cache=T>>=
+
+tru.model <- lm(speed ~ dist, data = cars)
+
+stats <- replicate(1e4, expr = {
+    prmtd <- sample(1:nrow(cars), replace = F)
+    lm(speed ~ I(dist[prmtd]), data = cars)$coef
+})
+stats <- stats[2, ]  # Fix attention to slope-coefficient only.
+
+### Estimated p-value of observing data at least as extreme.
+mean(abs(stats) >= abs(tru.model$coef['dist']))
+
+@ 
+
+\subsection{Bootstrapping confidence intervals}
 
 \begin{itemize}   \item Our sample gives a sense of the population.
   \item In reality, we only have one sample and we don't get to see the entire population.
   \item As a best guess for the population, we can use the sample we actually observed. \end{itemize}
-
 
 <<cache=T>>=
 require(MASS)  # For dataset: Boston.
@@ -404,15 +493,14 @@ N <- nrow(Boston)
 model <- lm(crim ~ tax + medv, data = Boston)
 
 ### Run a series of models, each time bootstrapping a coefficient.
-coefs <- replicate(1e4, expr = {
-    lm(crim ~ tax + medv, data = Boston[sample(1:N, replace = T), ])$coef['tax']
-})
-
+coefs <- replicate(1e4, expr = lm(crim ~ tax + medv, 
+                                  data = Boston[sample(1:N, replace = T), ])$coef['tax'])
 @
 
 With our statistics in hand, we're ready to bootstrap an estimated confidence interval for one of our coefficients.
 
-<<echo=F>>=
+
+<<echo=F,fig.height=4.5,cache=T>>=
 
 my <- quantile(coefs, probs = c(0.025, 0.975))
 ci <- confint(model, parm = 'tax')
@@ -425,28 +513,6 @@ abline(v = my[2], lty = 'dashed', col = 'orange')
 legend(x = 0.0325, y = 100, col = c('purple', 'orange'), lty = 'dashed', 
        legend = c('R', 'Bootstrap'))
 
-@ 
-
-\section{Permutation Testing}
-Let's examine whether there's a relationship between \texttt{distance} traveled
-and \texttt{speed} in our \texttt{Cars} dataset. How can we go about this?
-Well, if there was no relationship between the two variables, then permuting one
-and not the other should leave the relationship unchanged. To get a measure of
-how likely it is to observe the relationship we do, conditional on there being
-no true relationship, we can apply a \emph{permutation test}.
-
-<<>>=
-
-tru.model <- lm(speed ~ dist, data = cars)
-
-stats <- replicate(1e4, expr = {
-    prmtd <- sample(1:nrow(cars), replace = F)
-    lm(speed ~ I(dist[prmtd]), data = cars)$coef
-})
-stats <- stats[2, ]  # Fix attention to slope-coefficient only.
-
-### Estimated p-value of observing data at least as extreme.
-mean(abs(stats) >= abs(tru.model$coef['dist']))
 
 @ 
 
@@ -462,7 +528,7 @@ Lastly, we investigate the cornerstone of statistical inference: the hypothesis 
 %%   \textrm{Probability} & 0.4 & 0.3 & 0.1
 %% \end{table}
 
-<<>>=
+<<cache=T>>=
 
 MySample <- function(tbl, n) {
     replicate(n, expr = {
