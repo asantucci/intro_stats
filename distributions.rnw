@@ -43,7 +43,7 @@ Let $\{X_n : n \geq 1\}$ be a sequence of i.i.d. random variables with
 $\mathbb E[|X|] < \infty$. Then, the sample mean converges in probability to the first moment.
 Let's prove this result from the ground up.
 
-\subsection{Statement of the Theorem} We are given $X_1, X_2, \ldots, X_n$ independent
+\subsection{Statement of the Law of Large Numbers} We are given $X_1, X_2, \ldots, X_n$ independent
 and identically distributed RVs where $\Pr(X_j \leq x) = F(X)$ denotes 
 their common cumulative distribution function. Suppose that $E[X_i]=\mu$
 and $\textrm{var}(X_i) = \sigma^2$, then the \emph{weak law states that}
@@ -366,7 +366,11 @@ legend(x = 0.0325, y = 100, col = c('purple', 'orange'), lty = 'dashed',
 
 \section{Permutation Testing}
 Let's examine whether there's a relationship between \texttt{distance} traveled
-and \texttt{speed} in our \texttt{Cars} dataset.
+and \texttt{speed} in our \texttt{Cars} dataset. How can we go about this?
+Well, if there was no relationship between the two variables, then permuting one
+and not the other should leave the relationship unchanged. To get a measure of
+how likely it is to observe the relationship we do, conditional on there being
+no true relationship, we can apply a \emph{permutation test}.
 
 <<>>=
 
@@ -451,6 +455,12 @@ Bruno de Finetti.
 \newblock {\em Theory of Probability}.
 \newblock 1970, Wiley.
 
+
+\bibitem{taylor: jtaylor}
+Johnathan Taylor.
+\newblock {\em Data Science 101}.
+\newblock Stanford University, 2016.
+
 \end{thebibliography}
 
 % Bstrapping prediction error?
@@ -458,6 +468,7 @@ Bruno de Finetti.
 % A simple logistic regression?
 % Handling categorical variables?
 
-% Stats 305 notes section 9.6 (distributional results of OLS estimators)
+% Stats 305 notes section 9.6 (distributional results of OLS estimators).
+% Data Science 101 notes.
 
 \end{document}
