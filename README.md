@@ -11,6 +11,6 @@
 - Maximum likelihood estimation
 
 - Hypothesis testing
-  -Sign tests
-  -Permutation tests
-  -Bootstrapping confidence intervals
+    -Sign tests
+    -Permutation tests
+    -Bootstrapping confidence intervals
