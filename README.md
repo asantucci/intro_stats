@@ -1,16 +1,16 @@
 # intro_stats
 
-## Introduction to probability (brief)
+- Introduction to probability (brief)
 
-## Weak Law of Large Numbers
+- Weak Law of Large Numbers
 
-## Motivating least squares
+- Motivating least squares
 
-## Distributional results for OLS
+- Distributional results for OLS
 
-## Maximum likelihood estimation
+- Maximum likelihood estimation
 
-## Hypothesis testing
-### Sign tests
-### Permutation tests
-### Bootstrapping confidence intervals
+- Hypothesis testing
+  -Sign tests
+  -Permutation tests
+  -Bootstrapping confidence intervals
