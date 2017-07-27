@@ -116,7 +116,7 @@ Hence,
 where dividing through by $\epsilon^2$ yields the desired result. 
 \end{proof}
 
-\paragraph{Weak Law of Large Numbers} The WLLN states that $\bar{X}_n \overset{p}{\longrightarrow} \mu$ as $n \uparrow \infty$, i.e. the sample average 
+\subsection{Proving the Weak Law of Large Numbers} The WLLN states that $\bar{X}_n \overset{p}{\longrightarrow} \mu$ as $n \uparrow \infty$, i.e. the sample average 
 \ul{converges in probability} to the true average. This follows from Chebyschev's Inequality,
 \[
 \Pr(|\bar{X}_n - \mu| > \delta) \leq \frac{E \big[ (\bar{X}_n - \mu)^2 \big]}{\delta^2} = \frac{\sigma^2}{n\delta^2} \longrightarrow 0
@@ -130,13 +130,13 @@ as $n \uparrow \infty$ for all $\delta > 0$. We use the fact that $\bar{X}_n$ co
   Notice that
   \begin{alignat*}{5}     
     \mathbb E\left[ |\bar{X}_n - \mu|^2 \right]
-    &= \mathbb E \left[ \left(\frac{x_1 + x_2 + \ldots + x_n}{n} - \mu \right)^2 \right] \\
-    &= \mathbb E \left[ \left( \frac{(x_1 - \mu) + \ldots + (x_n - \mu)}{n}\right)^2 \right] \\
-    &= \frac{1}{n^2} \mathbb E \left[ \sum_{i=1}^n \sum_{j=1}^n (x_i - \mu) (x_j - \mu) \right] \\
-    &= \frac{1}{n^2} \sum_{i} \sum_{j} \mathbb E \left[ (x_i - \mu) (x_j - \mu)\right] \\
-    &= \frac{1}{n^2} \sum_i \mathbb E[(x_i-\mu)^2] \hspace{15pt} \textrm{Since } \textrm{cov}(X_i,X_j)=0\\
-    &= \frac{1}{n^2} \sum_i \textrm{var}(x_i) \\
-    &= \frac{1}{n^2} \textrm{var}(X), \hspace{25pt} \textrm{ where } \textrm{var}(X) < \infty. \end{alignat*}
+    &= \mathbb E \left[ \left(\frac{x_1 + x_2 + \ldots + x_n}{n} - \mu \right)^2 \right] &&\textrm{definition of } \bar X_n \\
+    &= \mathbb E \left[ \left( \frac{(x_1 - \mu) + \ldots + (x_n - \mu)}{n}\right)^2 \right] \hspace{25pt}&&\textrm{algebra} \\
+    &= \frac{1}{n^2} \mathbb E \left[ \sum_{i=1}^n \sum_{j=1}^n (x_i - \mu) (x_j - \mu) \right] \hspace{15pt}&&\textrm{expanding the square} \\
+    &= \frac{1}{n^2} \sum_{i} \sum_{j} \mathbb E \left[ (x_i - \mu) (x_j - \mu)\right] &&\textrm{linearity of expectation}\\
+    &= \frac{1}{n^2} \sum_i \mathbb E[(x_i-\mu)^2] &&\textrm{since } \textrm{cov}(X_i,X_j)=0 \\
+    &= \frac{1}{n^2} \sum_i \textrm{var}(x_i) &&\textrm{definition of variance} \\
+    &= \frac{1}{n^2} \textrm{var}(X), &&\textrm{ where } \textrm{var}(X) < \infty. \end{alignat*}
 
 We used the fact that if two random variables $X,Y$ are independent,
 then $\textrm{cov}(X,Y) = 0$.
@@ -161,7 +161,7 @@ therefore that $y \sim f(X)$. Since we don't
 know the functional form of $f$, we instead hope to approximate it via a linear model,
 $y \sim X\beta + \epsilon$. 
 But how do we determine our fitted-coefficients, $\hat \beta$? It's natural to define
-goodness of fit in terms of prediction error; we'll use the $\ell$-2 norm.
+goodness of fit in terms of prediction error; we'll use $\ell$-2 norm.
 \[
   \hat \beta = \argmin_{\beta} \| y - X \beta \|_2^2 = \argmin_\beta \sum_{i=1}^n \left(y_i - \beta_0 - \beta_1 x_{i1} - \ldots - \beta_p x_{ip}\right)^2.
 \]
@@ -213,10 +213,10 @@ that $\epsilon \sim \mathcal N(0, I_n)$, i.e. that our error term is normally di
 no correlation between observations (i.e. independent) and some constant variance. Why might this
 assumption be reasonable? In reality, it's not the most reasonable, but it makes our model mathematically tractable.
 
-\section{Distributional results} If we start off with $Y = X \beta + \epsilon$,
+\section{Distributional results for OLS} If we start off with $Y = X \beta + \epsilon$,
 where we assume $\epsilon \sim \mathcal N(0, \sigma^2 I)$, then we have the following.
 
-\paragraph{Distribution of response} Observe that $y$ depends on $\epsilon$, itself
+\subsection{Distribution of response} Observe that $y$ depends on $\epsilon$, itself
 a random variable, hence $y$ is a random variable. It therefore makes sense to consider
 its expectation and variance. Using linearity of expectation, and properties of variance,\footnote{In the calculation for variance, we've used the fact that if $Z$ a random variable and $a$
 is a constant, then $\textrm{var}(a+Z) = \textrm{var} (Z)$, which can be verified using
@@ -226,7 +226,7 @@ the definition of variance.
 \begin{align*}   \mathbb E[y|X] &= \mathbb E[X\beta + \epsilon | X] = \mathbb E [X \beta | X] + \mathbb E[\epsilon | X] = X \beta. \\
   \textrm{var}(y|X) &= \textrm{var}(X \beta + \epsilon | X) = \textrm{var}(\epsilon|X) = \sigma^2 I. \end{align*}
 
-
+\subsection{Distribution of fitted coefficients}
 \paragraph{First and second moment of coefficients} We have a formula for $\hat \beta = (X^TX)^{-1} X^T y$.
 Since $y$ is random, and since $\hat \beta$ is a function of $y$, then this implies that $\hat \beta$ also a random variable.\footnote{We caveat that the population parameter,  
   $\beta$, is a constant and \emph{not} a random variable.} We start by considering the
@@ -355,7 +355,7 @@ Hence for all $\delta > 0$,
 Does this imply that $\hat \theta_n = \argmax_{|\theta - \theta^*| \leq a} \ell_n(\theta) \overset{P}{\longrightarrow} \theta^*$?
 Yes! \href{http://projecteuclid.org/euclid.aoms/1177729952}{Wald (1948)}.
 
-\subsubsection{Applying MLE in R}
+\subsection{Applying MLE in R}
 Let's see how we can apply what we've learned in our favorite programming language, R!
 
 <<>>=
@@ -402,7 +402,7 @@ m$par - lm(Y ~ 0 + X)$coef < 1e-3
 @ 
 
 
-\section{Hypothesis testing} Asdf
+\section{Hypothesis testing}
 
 \subsection{Sign Tests}
 Suppose 10 patients were given treatment for a disease, and their survival times reported in weeks.
@@ -454,10 +454,11 @@ Let's examine whether there's a relationship between \texttt{distance} traveled
 and \texttt{speed} in our \texttt{Cars} dataset. How can we go about this?
 Well, if there was no relationship between the two variables, then permuting one
 and not the other should leave the relationship unchanged. To get a measure of
-how likely it is to observe the relationship we do, conditional on there being
-no true relationship, we can apply a \emph{permutation test}.
+how likely it is to observe the data we do, conditional on there being
+no true relationship, we apply a \emph{permutation test}.
 
 \begin{algorithm}
+  \caption{Permutation Test}
   Compute a test statistic between $k$ groups, e.g. a difference of means \\
   Randomly shuffle the data assigned to each group \\
   Measure the test-statistic on the shuffled data \\
