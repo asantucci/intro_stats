@@ -1,0 +1,609 @@
+\documentclass[12pt]{article}  
+\usepackage[linesnumbered]{algorithm2e} \usepackage{amsmath} \usepackage{amsthm} \usepackage{amsfonts} \usepackage{bbm} \usepackage{color,soul} \usepackage{framed} \usepackage[margin=0.5in]{geometry} \usepackage{hyperref} \usepackage{mathtools} \usepackage[dvipsnames]{xcolor} 
+\usepackage{tikz} \newtheorem{theorem}{Theorem}[section] \newtheorem{lemma}[theorem]{Lemma} \newtheorem{proposition}[theorem]{Proposition} \newtheorem{corollary}[theorem]{Corollary}  \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil} \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor} \DeclareMathOperator*{\argmin}{arg\,min} \DeclareMathOperator*{\argmax}{arg\,max} \newcommand{\D}{\mathrm{d}} \SetKwInput{KwInput}{Input} \SetKwInput{KwOutput}{Output}  \begin{document}
+
+\title{\textbf{Tenants of Statistics}}
+\author{Andreas Santucci}
+\date{August 2017}
+\maketitle
+
+\section{Review of Probability}
+Basic concepts of probability are more easily explained in a finite state space.
+There is a finite set
+\[
+\mathcal S = \{s_1, \ldots, s_M\}
+\]
+whose elements are are said to be \emph{elementary events}. 
+A \emph{probability measure} assigns a real number $P(s)$ to each state $s \in S$.
+One and only one of the states will occur, and that's reflected in the probabilities being
+non-negative and summing to one.
+
+\begin{align*}   \Pr(s_j) \geq 0, \hspace{25pt} \sum_{j=1}^M \Pr(s_j) = 1. \end{align*}
+
+An \emph{event} $A$ is a subset of state-space $S$, and it is said to occur if it contains the state that occurs. I.e.
+\[
+\Pr(A) = \sum_{s \in A} \Pr(s).
+\]
+
+We take as axiom the following rule of conditional probability, 
+$\Pr(A,B) = \Pr(A) \cdot \Pr(B | A)$.
+A \emph{random variable} is a mapping from the state-space to the real-numbers. Its expectation is 
+formed by a weighted average,
+\[
+\mathbb E[Y] = \sum_{j=1}^{M} Y(s_j) \Pr(s_j).
+\]
+
+We have the \emph{law of total probability},
+\[
+\Pr(A) = \sum_{j} \Pr(A|B_j) \Pr(B_j)
+\]
+where $\{B_i\}$ forms a partition of $\mathcal S$, i.e. $\cup_j B_j = \mathcal S$ and $B_i \cap B_j = \emptyset$.
+
+\subsection{Practice problems: probability}
+
+\begin{enumerate}   \item A family has two children. What's the probability that both are boys, conditional
+    on at least one of them being a boy?
+    % bb, bg, gb, gg are the sample space. One a boy --> bb, bg, gb --> 1/3.
+  \item Three men went to a party and hang their coats in a closet. When they left, each randomly
+    grabs a coat. What's the probability that they all get their own coat?
+    % Pr(all get coat) = Pr(A gets coat) * Pr(B gets coat | A gets coat) * Pr(C gets coat | A,B get)
+    % = 1/3 * 1/2 * 1 = 1/6. Shortcut: there are 3! orderings of coats. Only one of them gets
+    % the assignment right, hence 1/3! = 1 / 6.
+\end{enumerate}
+
+\section{Weak law of large numbers}
+Let $\{X_n : n \geq 1\}$ be a sequence of i.i.d. random variables with
+$\mathbb E[|X|] < \infty$. Then, the sample mean converges in probability to the first moment.
+Let's prove this result from the ground up.
+
+\subsection{Statement of the Law of Large Numbers} We are given $X_1, X_2, \ldots, X_n$ independent
+and identically distributed RVs where $\Pr(X_j \leq x) = F(X)$ denotes 
+their common cumulative distribution function. Suppose that $E[X_i]=\mu$
+and $\textrm{var}(X_i) = \sigma^2$, then the \emph{weak law states that}
+ $\Pr(|\bar{X}_n - \mu| > \delta) \longrightarrow 0$ for any $\delta > 0$,
+as $n \uparrow \infty$; i.e.
+``with high probability, $\bar{X}_n$ close to $\mu$''. 
+On the other hand, the \emph{strong law states that} $\bar{X}_n \longrightarrow \mu$ with probability 1; i.e.
+``with a single experiment, if we run it long enough, we \emph{will get} $\mu$''. 
+
+\paragraph{Sample mean} We are interested in the sample (empirical) mean,
+\[
+\bar{X}_n = \frac{X_1 + X_2 + \ldots + X_n}{n}.
+\]
+
+\paragraph{Sample variance}
+We expect that the sample mean should be closely related to the theoretical mean $\mu = E[X_j]$. We denote the \emph{variance} of $X_j$ by
+\[
+\sigma^2 = \textrm{var}(X_j) = E\big[ (X_j - \mu)^2 \big] = \int_{\mathbb R} (x-\mu)^2 d F(x).
+\]
+
+\subsection{Markov's Inequality} If $X$ is a non-negative random variable
+and $a > 0$, then
+\[
+\Pr(X \geq a) \leq \frac{\mathbb E[X]}{a}.
+\]
+
+\begin{proof}   Given $a > 0$, and non-negative $X$,
+  \[
+    a \mathbbm 1\{X \geq a\} \leq X
+  \]
+  is clearly true (consider two cases, when $X \geq a$ and $X < a$).
+  Note that $\mathbb E[\cdot]$ is a monotone operator, hence
+  \[
+    \mathbb E\left[ a \mathbbm 1\{X \geq a\} \right] \leq \mathbb E[X].
+  \]
+  By linearity of expectation, we may re-express $\mathbb E\left[ a \mathbbm 1\{X \geq a\} \right]$ as
+  \[
+    a \mathbb E\left[ \mathbbm 1\{X \geq a\} \right] = a \cdot \Pr(X \geq a) + 0 \cdot \Pr(X < a) = a \Pr(X \geq a). 
+  \]
+  Hence
+  \[
+    a \Pr(X \geq a) \leq \mathbb E[X].
+  \]
+  Since $a > 0$, dividing both sides by $a$ yields the final result. \end{proof}
+
+\subsection{Practice problem: Markov's inequality application}
+\begin{enumerate}   \item Let $X$ denote the \# of heads observed when tossing a fair coin $n$ times.
+    Find an upper bound for $\Pr(X \geq k)$. If it's helpful, set $k=n/4$, i.e. what is the probability of getting at least 25\% heads?
+    % E[X] = n/2.
+    % Pr(X \geq k) \leq \frac{n/2}{k} = \frac{n}{2k} \end{enumerate}
+\end{enumerate}
+
+\subsection{Chebyshev's Inequality} Is of the form
+\begin{align*}
+\Pr(|X-\mu| > \delta) &\leq \frac{\mathbb E \left[ |X - \mu| \right]}{\delta}, \, \, &\delta > 0.
+\end{align*}
+
+\begin{proof}   
+Using the definition of variance,
+\begin{align*}     
+  \sigma^2 &= \textrm{var}(X) = \int_{-\infty}^\infty (t - \mu)^2 f_X(t) dt \\
+           &\geq \int_{-\infty}^{\mu - \epsilon} (t - \mu)^2 f_X(t) dt + \int_{\mu + \epsilon}^\infty (t- \mu)^2 f_X(t) dt,   
+\end{align*}
+  where the last inequality follows from the fact that $f_X(t)$ non-negative, and $(t-\mu)^2$ also non-negative, hence $\left((t-\mu)^2f_X(t)\right)$
+non-negative for all $t$. Hence by restricting the range over which we integrate a positive function, we yield a lower-bound. Then, this is
+\[
+\geq \int_{-\infty}^{\mu - \epsilon} \epsilon^2 f_X(t) dt + \int_{\mu + \epsilon}^\infty \epsilon^2 f_X(t) dt,
+\]
+since $t \leq \mu - \epsilon \implies \epsilon \leq |t-\mu| \implies \epsilon^2 \leq (t-\mu)^2$. When we re-arrange, and apply the definition of the density function, we see that
+\begin{align*}   &= \epsilon^2 \left(\int_{-\infty}^{\mu - \epsilon} f_X(t) dt + \int_{\mu + \epsilon}^{\infty} f_X(t) dt \right) \\
+  &= \epsilon^2 \Pr(X \leq \mu - \epsilon \lor X \geq \mu + \epsilon) \\
+  &= \epsilon^2 \Pr \left( |x - \mu| \geq \epsilon \right).  \end{align*}
+Hence,
+\[
+  \sigma^2 \geq \epsilon^2 \Pr(|X-\mu| \geq \epsilon),
+\]
+where dividing through by $\epsilon^2$ yields the desired result. 
+\end{proof}
+
+\subsection{Proving the Weak Law of Large Numbers} The WLLN states that $\bar{X}_n \overset{p}{\longrightarrow} \mu$ as $n \uparrow \infty$, i.e. the sample average 
+\ul{converges in probability} to the true average. This follows from Chebyschev's Inequality,
+\[
+\Pr(|\bar{X}_n - \mu| > \delta) \leq \frac{E \big[ (\bar{X}_n - \mu)^2 \big]}{\delta^2} = \frac{\sigma^2}{n\delta^2} \longrightarrow 0
+\]
+as $n \uparrow \infty$ for all $\delta > 0$. We use the fact that $\bar{X}_n$ converges to $\mu$ also in mean-square, i.e. $E\big[ (\bar{X}_n - \mu)^2 \big] \longrightarrow 0$.
+
+\begin{proof}   By Chebyschev's Inequality,
+  \[
+    \Pr(|\bar{X}_n - \mu| > \delta) \leq \frac{1}{\delta^2} E\left[ |\bar{X}_n - \mu|^2 \right].
+  \]
+  Notice that
+  \begin{alignat*}{5}     
+    \mathbb E\left[ |\bar{X}_n - \mu|^2 \right]
+    &= \mathbb E \left[ \left(\frac{x_1 + x_2 + \ldots + x_n}{n} - \mu \right)^2 \right] &&\textrm{definition of } \bar X_n \\
+    &= \mathbb E \left[ \left( \frac{(x_1 - \mu) + \ldots + (x_n - \mu)}{n}\right)^2 \right] \hspace{25pt}&&\textrm{algebra} \\
+    &= \frac{1}{n^2} \mathbb E \left[ \sum_{i=1}^n \sum_{j=1}^n (x_i - \mu) (x_j - \mu) \right] \hspace{15pt}&&\textrm{expanding the square} \\
+    &= \frac{1}{n^2} \sum_{i} \sum_{j} \mathbb E \left[ (x_i - \mu) (x_j - \mu)\right] &&\textrm{linearity of expectation}\\
+    &= \frac{1}{n^2} \sum_i \mathbb E[(x_i-\mu)^2] &&\textrm{since } \textrm{cov}(X_i,X_j)=0 \\
+    &= \frac{1}{n^2} \sum_i \textrm{var}(x_i) &&\textrm{definition of variance} \\
+    &= \frac{1}{n^2} \textrm{var}(X), &&\textrm{ where } \textrm{var}(X) < \infty. \end{alignat*}
+
+We used the fact that if two random variables $X,Y$ are independent,
+then $\textrm{cov}(X,Y) = 0$.
+
+Hence, as $n\longrightarrow \infty$,
+\[
+\Pr( |\bar{X}_n - \mu| > \delta) \leq \frac{\textrm{var}(X)}{\delta^2 n} \longrightarrow 0,
+\]
+for \emph{any} $\delta > 0$. \footnote{\textbf{What if $\pmb{\textrm{var}(X) = + \infty}$?} We can still get to the same result, but we can no longer use Chebyschev's inequality.
+  
+\textbf{What if $\pmb{\{x_j\}}$ dependent?} The result does not hold. There are many counter examples. Suppose all $x_j$ the same. Then the result clearly
+does not follow. Hence we need some sort of approximate independence,
+i.e. $X_j$ must be sufficiently uncorrelated.}
+\end{proof}
+
+
+\section{Motivating least squares}
+We have a response variable and some relevant explanatory variables.
+It would be nice if there were a true function mapping our explanatory variables
+to a particular and correct value of the response. We'll assume such a function exists, and
+therefore that $y \sim f(X)$. Since we don't
+know the functional form of $f$, we instead hope to approximate it via a linear model,
+$y \sim X\beta + \epsilon$. 
+But how do we determine our fitted-coefficients, $\hat \beta$? It's natural to define
+goodness of fit in terms of prediction error; we'll use $\ell$-2 norm.
+\[
+  \hat \beta = \argmin_{\beta} \| y - X \beta \|_2^2 = \argmin_\beta \sum_{i=1}^n \left(y_i - \beta_0 - \beta_1 x_{i1} - \ldots - \beta_p x_{ip}\right)^2.
+\]
+
+Our least squares estimate falls out immediately.
+
+\[
+  \hat \beta = \argmin_{\beta} \|y - X\beta\|^2 = \argmin_\beta (y - X \beta)^T (y - X \beta) = \argmin_\beta -2\beta^T X^T y + \beta^T X^T X \beta \implies \hat \beta = (X^TX)^{-1} X^T y 
+\]
+
+This is enough to write a short program to solve for least-squares from scratch. 
+
+\subsection{Practice problem: solving OLS}
+
+\begin{enumerate}   \item Write a short R program to solve for least-squares from scratch. You are allowed to use R's \texttt{solve} command to invert a matrix.\footnote{This is, in practice, a bad idea for reasons relating to numerical stability.} \end{enumerate}
+
+<<>>=
+linearRegression <- function(y, x, intercept = T) 
+    ### Write a short program to output the following objects.
+    list('coefficients' = NA,  # A vector of coefficients, beta.
+         'covariance'   = NA,  # Variance/Covariance matrix.
+         'fitted'       = NA,  # Fitted values for each data point.
+         'residuals'    = NA,  # Residual for each data point.
+         'rsq'          = NA)  # R-squared metric.
+@ 
+
+
+\paragraph{Note}
+For statistical inference, we'll need to know more about the distributional results of our estimator. More on that later. For now, it's enough to consider the assumption
+that $\epsilon \sim \mathcal N(0, I_n)$, i.e. that our error term is normally distributed with
+no correlation between observations (i.e. independent) and some constant variance. Why might this
+assumption be reasonable? In reality, it's not the most reasonable, but it makes our model mathematically tractable.
+
+
+<<echo=F>>=
+
+rSquare <- function(y, yhat, intercept) if (intercept) cor(y, yhat)^2 else sum(yhat^2)/sum(y^2)
+
+sigmaSquare <- function(residuals, p) sum(residuals^2) / (length(residuals) - p)
+
+linearRegression <- function(y, x, intercept = T, alpha = NULL) {
+    x <- as.matrix(x)  # Ensure matrix operations available.
+    if (!is.null(alpha)) y <- y - alpha
+    if (intercept)       x <- cbind(1, x)
+    xpx.inv <- solve(t(x) %*% x)
+    beta    <- xpx.inv %*% t(x) %*% y
+    yhat    <- x %*% beta
+    sigma.square   <- sigmaSquare(y-yhat, ncol(x))
+    rownames(beta) <- paste0('B', 1:length(beta) - intercept)
+    list('coefficients' = beta,
+         'covariance'   = xpx.inv * sigma.square,
+         'fitted'       = yhat,
+         'residuals'    = y - yhat,
+         'rsq'          = rSquare(y, yhat, intercept))
+}
+@ 
+
+
+\section{Distributional results for OLS} If we start off with $Y = X \beta + \epsilon$,
+where we assume $\epsilon \sim \mathcal N(0, \sigma^2 I)$, then we have the following.
+
+\subsection{Distribution of response} Observe that $y$ depends on $\epsilon$, itself
+a random variable, hence $y$ is a random variable. It therefore makes sense to consider
+its expectation and variance. Using linearity of expectation, and properties of variance,\footnote{In the calculation for variance, we've used the fact that if $Z$ a random variable and $a$
+is a constant, then $\textrm{var}(a+Z) = \textrm{var} (Z)$, which can be verified using
+the definition of variance.
+}
+
+\begin{align*}   \mathbb E[y|X] &= \mathbb E[X\beta + \epsilon | X] = \mathbb E [X \beta | X] + \mathbb E[\epsilon | X] = X \beta. \\
+  \textrm{var}(y|X) &= \textrm{var}(X \beta + \epsilon | X) = \textrm{var}(\epsilon|X) = \sigma^2 I. \end{align*}
+
+\subsection{Distribution of fitted coefficients}
+\paragraph{First and second moment of coefficients} We have a formula for $\hat \beta = (X^TX)^{-1} X^T y$.
+Since $y$ is random, and since $\hat \beta$ is a function of $y$, then this implies that $\hat \beta$ also a random variable.\footnote{We caveat that the population parameter,  
+  $\beta$, is a constant and \emph{not} a random variable.} We start by considering the
+expectation of our estimator.
+
+\begin{align*}   \mathbb E [\hat \beta | X] &= \mathbb E\left[(X^TX)^{-1} X^T y | X \right] = (X^TX)^{-1} X^T \underbrace{\mathbb E[y|X]}_{X \beta} = \beta, \\ \end{align*}
+
+Note that we are assuming our data are fixed (i.e. \emph{not} random); we can remove this assumption and still get an unbiased estimator; see practice problem.
+
+This leads us to question, what about the variance of our estimator?\footnote{In the calculation for variance, we've used the fact that if $Z$ a random variable and $a$
+is a constant, then $\textrm{var}(aZ) = a^2 \textrm{var} (Z)$, which can be verified using
+the definition of variance.
+}
+
+\begin{align*}   \textrm{var}(\hat \beta | X) &= \textrm{var}\left((X^TX)^{-1}X^T y |X\right) = (X^TX)^{-1} X^T \underbrace{\textrm{var}(y)}_{\sigma^2 I} X (X^TX)^{-T}  = \sigma^2 (X^TX)^{-1}. \end{align*}
+
+
+Larger values of $X^TX$ lead to smaller variance. %% We remark that our estimator is unbiased
+%% when errors are uncorrelated (i.e. $\mathbb E[\epsilon|X] = 0$) and that our population variance
+%% a scalar multiple of an identity matrix, then we have that
+%% $\hat \sigma^2 = \frac{\texttt{RSS}}{n-p'}$ is unbiased. Here, $n-p'$ denotes the effective degrees of freedom, and $p' = p+\mathbbm 1\{\textrm{intercept used}\}$. Of course, $p$ is the number of features in our design matrix $X$.
+
+\paragraph{Distribution of $\pmb{\hat\beta}$}
+Suppose for a moment that $X$ is full-rank; if not, remove features until it is full-rank. Then, 
+notice that in specifying $y=X \beta + \epsilon$ and that
+$\hat \beta = (X^TX)^{-1} X^T y$, the implication is that
+\[
+  \hat\beta = (X^TX)^{-1} X^T y = (X^TX)^{-1} X^T (X \beta + \epsilon) = \beta + (X^TX)^{-1} X^T \epsilon.
+\]
+
+Here, we are suggesting that $\hat\beta$ is a linear transformation of our error $\epsilon$,
+i.e. $\hat\beta$ is a linear transformation of a normally distributed random variable. We know
+from probability that linear transformations of normally distributed random variables yield 
+yet another normal random variable.\footnote{This can be shown using distribution functions, directly.} Hence $\hat\beta$ is normally distributed, 
+and its first two moments alongside
+its distribution function fully specify the random variable. I.e.
+
+\[
+  \hat \beta \sim \mathcal N(\beta, \sigma^2 (X^TX)^{-1})
+\]
+
+How do we estimate $\hat \beta$ in practice? We need to solve for $\hat \beta = (X^TX)^{-1} X^T y$,
+but yet we can't invert $(X^TX)$ directly: it's costly
+and prone to numerical inaccuracies. Realize instead that we just showed that $\hat \beta \sim \mathcal N$, and recall that there exists a method called Maximum Likelihood Estimation which finds the parameters to make the observed data most likely under the specified distribution. 
+To that end, we turn to MLE, which will get us an estimate of 
+$\hat \beta$ to within machine precision.
+
+\subsection{Practice problem: unbiased estimator}
+\begin{enumerate}   \item Suppose that our data are random. Is OLS still unbiased? (Hint: consider
+    \href{https://en.wikipedia.org/wiki/Law_of_total_expectation}{law of total expectation}.)
+    % by first conditioning on a given dataset, then taking the expectation over all data, 
+    % i.e. $\mathbb E[X] = \mathbb E[\mathbb E[X|Y]]$. In this case, our estimates 
+    % $\hat \beta$ still unbiased, since $\mathbb E[\hat \beta]] = \mathbb E[\mathbb E[\hat \beta|X]] = \mathbb E [ \beta] = \beta$. %% We remark that our estimator is unbiased whenever
+%% $\mathbb E[\epsilon|X] = 0$ and $\textrm{var}(\epsilon|X) = \sigma^2 I$.
+  \end{enumerate}
+
+\section{Maximum likelihood estimation}
+We now derive some theory behind a common type of estimator.
+
+\paragraph{Set Up} Suppose $X$ a random variable with density $f(x|\theta)$ 
+depending on parameter $\theta$, which is unknown; $\theta \in \Theta \subseteq \Bbb R$. We denote the theoretical true value by $\theta^*$ (itself
+unknown). We draw a sample $X_1, X_2, \ldots, X_n$ i.i.d. from
+$f(x|\theta^*)$.
+
+\paragraph{Problem} Estimate $\theta^*$ from the sample, i.e.
+find $\hat \theta_n(x_1, x_2, \ldots, x_n)$ such that $\hat \theta_n \approx \theta^*$ for $n$ large enough.
+
+\paragraph{Example} $f(x|\mu)$ is a density with parameter $\mu$, its mean.
+Suppose we let $\hat \theta_n = \bar X_n$. 
+
+\paragraph{What do we want from our estimator?}
+We know that (by WLLN) 
+$\hat \theta_n \overset{P}{\longrightarrow} \mu^*,$ the true mean. What do we want
+from our estimator $\hat \theta_n$?
+
+(1) Consistency: $\hat \theta_n \overset{P}{\longrightarrow} \theta^*$, i.e.
+we want our estimator to go to the right value.
+
+(2) Efficiency: We also want our estimator to get to the right value as fast as possible.
+\emph{If} we have the asymptotic result that
+  $\sqrt n (\hat \theta_n - \theta^*) \overset{ \mathcal D}{\longrightarrow} \mathcal N (0, \sigma^2)$,
+\emph{then} $\sigma^2$ is the smallest possible among consistent estimators.
+
+\subsubsection{Derivation}
+We draw $X_1, X_2, \ldots, X_n$ i.i.d. sample from $f(x|\theta^*)$.
+We are given the data, we do not know $\theta^*$.
+We assume Regularity Conditions such as differentiability of 
+$f(x|\theta)$ with respect to $\theta$.
+Examine the Likelihood Function,
+\[
+L_n(\theta) = f(x_1|\theta) f(x_2|\theta) \ldots f(x_n|\theta),
+\]
+where $\prod_{i=1}^nf(x_i|\theta)$ denotes the joint density of 
+$x_i$ drawn i.i.d. from $f(x|\theta)$. Let 
+\[
+\hat \theta_n = \argmax_{\theta \in \Theta} L_n(\theta).
+\]
+
+Notice that $\log$ is a monotone transform, and $f(x_j)$ non-negative,
+hence $\prod_{k=1}^n f(x_k)$ non-negative. Then,
+
+\[
+\ell_n(\theta) = \frac{1}{n} \log L_n (\theta) = \frac{1}{n} \sum_{j=1}^n \log f(x_j|\theta).
+\]
+
+By WLLN,
+\[
+\ell_n(\theta) \overset{P}{\longrightarrow} \int_{-\infty}^\infty \log f(x|\theta) f(x|\theta^*) \D x,
+\]
+i.e. as $n \uparrow \infty$, $\Pr(|\ell_n (\theta) - \ell(\theta)| > \delta) \longrightarrow 0$ for all $\delta > 0$ and for each $\theta \in \Theta$.
+
+In the section which follows, $f'$ always denotes derivative with 
+respect to $\theta$.
+
+\begin{alignat*}{5}
+&\ell(\theta) &&= \int \log f(x|\theta) \cdot f(x|\theta^*) \D x \implies \ell '(\theta) = \int_{-\infty}^\infty \frac{f'(x|\theta)}{f(x|\theta)} f(x|\theta^*) \D x \hspace{25pt} &&\textrm{by chain rule} \\
+\implies &\ell '(\theta^*) &&= \int_{-\infty}^\infty f'(x|\theta^*) \D x = \frac{\D}{\D \theta} \left( \int_{-\infty}^\infty f(x|\theta) \D x \right) \bigg|_{\theta = \theta^*} = 0. \end{alignat*}
+
+Since $\ell'(\theta^*) = 0$, at least we know that $\theta^*$ is a 
+critical point of $\ell(\theta)$.
+We know that $\ell_n(\theta) \overset{P}{\longrightarrow} \ell(\theta)$ by WLLN.
+Further, \href{http://www.amazon.com/Course-Sample-Chapman-Statistical-Science/dp/0412043718}{Ferguson (1996)}, this holds uniformly in $\theta$ for
+\[
+| \theta - \theta^*| \leq a.
+\]
+Hence for all $\delta > 0$,
+\[
+\Pr\left( \max_{|\theta - \theta^*| \leq a} \bigg|\ell_n(\theta) - \ell(\theta)\bigg| > \delta \right) \overset{n \uparrow \infty}{\longrightarrow} 0.
+\]
+
+Does this imply that $\hat \theta_n = \argmax_{|\theta - \theta^*| \leq a} \ell_n(\theta) \overset{P}{\longrightarrow} \theta^*$?
+Yes! \href{http://projecteuclid.org/euclid.aoms/1177729952}{Wald (1948)}.
+
+\subsection{Practice problem: applying MLE in R}
+Let's see how we can apply what we've learned in our favorite programming language, R! Recall that if $X \sim \mathcal N(\mu, \sigma^2)$ then
+the probability density function for $X$ given by
+$f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-(\mu-x)^2 / (2 \sigma^2)}$
+
+<<>>=
+
+### For use of the `%>%` operator.
+require(magrittr)
+
+### Simply a normal density. Also built-in to R: see dnorm.
+MyDensity <- function(x, mu = 0, ss = 1) 
+    1/sqrt(2*pi*ss) * exp(-(mu-x)^2/(2*ss))
+
+### Returns minus the log-likelihood of a normally distributed RV.
+LL <- function(beta, response, data)
+    -1 * MyDensity(response - (data %>% as.matrix) %*% beta) %>% log %>% sum
+
+@ 
+
+\paragraph{Simulating Data}
+Now that we've defined our functions, let's simulate some data.
+
+<<>>=
+
+N <- 10
+P <- 2
+X <- matrix(rnorm(P*N), nrow = N)
+Y <- runif(N)
+
+@ 
+
+\paragraph{Running a regression}
+Great, now we run a regression and compare the results.
+
+<<>>=
+
+m <- optim(par = c('beta' = rep(0, ncol(X))), fn = LL, response = Y, data = X)
+
+@ 
+
+\paragraph{Determining Correctness}
+We verify that our regression well set-up.
+
+<<>>=
+m$par - lm(Y ~ 0 + X)$coef < 1e-3
+@ 
+
+
+\section{Hypothesis testing}
+
+\subsection{Sign Tests}
+Suppose 10 patients were given treatment for a disease, and their survival times reported in weeks.
+One patient outlived the study. The survival times were
+
+<<>>=
+surv <- c(49, 58, 75, 110, 112, 132, 151, 276, 281, 362)
+@ 
+
+Where we caveat that the last observation represents the censored patient who was still
+alive at the end of the 362 week study. We ask ourselves: was the median survival time less than or greater than 200 weeks? The null hypothesis is that median survival is 200 weeks.
+
+We create a new series of data by comparing each existing observation with 200;
+we output a \texttt{-} or \texttt{+} correspondingly. We now reframe our question:
+if the median survival time was 200 weeks, how many $\pm$'s would you expect to see?
+Under the null, the number of \texttt{-}'s will have a binomial distribution with probability of success $p=1/2$. So, the probability of observing data at least as extreme is given by
+\[
+\Pr(\# \texttt{-} = k) = \binom{n}{k} \cdot \frac{1}{2^k} \cdot \frac{1}{2^{n-k}} 
+\]
+In our data, we observe 7 out of 10 observations less than 200. Under the null,
+the probability of observing an outcome at least as extreme as we did is given by
+\[
+  \sum_{\substack{k=1 \\ k \neq 4,5,6}}^{10} \Pr(\# \texttt{-} = k) = \frac{1}{2}^{10} \sum_{k \in \{0,1,2,3,7,8,9,10\}} \binom{10}{k} \approx 0.3438.
+\]
+
+
+To see this in R,
+
+<<>>=
+
+### Remember, we're interested in a two-tail test.
+nck <- choose(10, c(0:3, 7:10))
+1/2^(10) * sum(nck)
+
+@ 
+
+We can do this a bit more simply, using R's built-in functions.
+
+<<>>=
+binom.test(x = 7, n = 10, p = 0.5, alternative = 'two.sided')
+@ 
+
+This is well and good, but what if we don't know the distribution of our test-statistic?
+E.g. above we knew that if the median survival rate was 200 weeks, then it would be ``like a coin-toss'' whether an observation met the threshold. However, this took insight. When we don't know
+the distribution of the test-statistic, we need to have a non-parametric test.
+
+\subsection{Permutation Testing}
+Let's examine whether there's a relationship between \texttt{distance} traveled
+and \texttt{speed} in our \texttt{Cars} dataset. How can we go about this?
+Well, if there was no relationship between the two variables, then permuting one
+and not the other should leave the relationship unchanged. To get a measure of
+how likely it is to observe the data we do, conditional on there being
+no true relationship, we apply a \emph{permutation test}.
+
+\begin{algorithm}
+  \caption{Permutation Test}
+  Compute a test statistic between $k$ groups, e.g. a difference of means \\
+  Randomly shuffle the data assigned to each group \\
+  Measure the test-statistic on the shuffled data \\
+  Repeat steps 2 and 3 many times \\
+  Compare the test-statistic from step 1 to those obtained in steps  2-3
+\end{algorithm}
+<<cache=T>>=
+
+tru.model <- lm(speed ~ dist, data = cars)
+
+stats <- replicate(1e4, expr = {
+    prmtd <- sample(1:nrow(cars), replace = F)
+    lm(speed ~ I(dist[prmtd]), data = cars)$coef
+})
+stats <- stats[2, ]  # Fix attention to slope-coefficient only.
+
+### Estimated p-value of observing data at least as extreme.
+mean(abs(stats) >= abs(tru.model$coef['dist']))
+
+@ 
+
+\subsection{Bootstrapping confidence intervals}
+
+\begin{itemize}   \item Our sample gives a sense of the population.
+  \item In reality, we only have one sample and we don't get to see the entire population.
+  \item As a best guess for the population, we can use the sample we actually observed. \end{itemize}
+
+<<cache=T>>=
+require(MASS)  # For dataset: Boston.
+N <- nrow(Boston)
+
+### Run one model.
+model <- lm(crim ~ tax + medv, data = Boston)
+
+### Run a series of models, each time bootstrapping a coefficient.
+coefs <- replicate(1e4, expr = lm(crim ~ tax + medv, 
+                                  data = Boston[sample(1:N, replace = T), ])$coef['tax'])
+@
+
+With our statistics in hand, we're ready to bootstrap an estimated confidence interval for one of our coefficients.
+
+
+<<echo=F,fig.height=4.5,cache=T>>=
+
+my <- quantile(coefs, probs = c(0.025, 0.975))
+ci <- confint(model, parm = 'tax')
+
+hist(coefs, prob = T, main = 'Histogram of coefficients', xlab = 'Estimated coefficient')
+abline(v = ci[1], lty = 'dashed', col = 'purple')
+abline(v = ci[2], lty = 'dashed', col = 'purple')
+abline(v = my[1], lty = 'dashed', col = 'orange')
+abline(v = my[2], lty = 'dashed', col = 'orange')
+legend(x = 0.0325, y = 100, col = c('purple', 'orange'), lty = 'dashed', 
+       legend = c('R', 'Bootstrap'))
+
+
+@ 
+
+
+\bibliographystyle{plain}
+\begin{thebibliography}{10}
+\bibitem{clain: ec2120}
+G. Chamberlain.
+\newblock {\em Econometrics 2120}.
+\newblock Harvard University, Winter 2017.
+
+\bibitem{papa: 308}
+G. Papanicalou.
+\newblock {\em CME 308: Stochastic Processes}.
+\newblock Stanford University, Spring 2016.
+
+\bibitem{ferguson: lst}
+Thomas S. Ferguson
+\newblock {\em A course in large sample theory}.
+\newblock University of California, Los Angeles.
+
+\bibitem{Wald: 48}
+Abraham Wald.
+\newblock {\em Note on the consistency of the maximum likelihood estimate}.
+\newblock Annals of Mathematical Statistics, 1949.
+
+\bibitem{islr: intro stat learning}
+James et. al.
+\newblock {\em An introduction to statistical learning}.
+\newblock Springer 2017.
+
+
+\bibitem{bstr: bstrapefron}
+Bradley Efron.
+\newblock {\em Bootstrap methods: another look at the jackknife}.
+\newblock Annals of Statistics, 1979.
+
+\bibitem{fin: finetti}
+Bruno de Finetti.
+\newblock {\em Theory of Probability}.
+\newblock 1970, Wiley.
+
+
+\bibitem{taylor: jtaylor}
+Johnathan Taylor.
+\newblock {\em Data Science 101}.
+\newblock Stanford University, 2016.
+
+\end{thebibliography}
+
+% Bstrapping prediction error?
+% Handling 0-1 response variables
+% A simple logistic regression?
+% Handling categorical variables?
+
+% Stats 305 notes section 9.6 (distributional results of OLS estimators).
+% Data Science 101 notes.
+
+\end{document}
