@@ -389,7 +389,7 @@ Yes! \href{http://projecteuclid.org/euclid.aoms/1177729952}{Wald (1948)}.
 
 \subsection{Practice problem: applying MLE in R}
 Let's see how we can apply what we've learned in our favorite programming language, R! Recall that if $X \sim \mathcal N(\mu, \sigma^2)$ then
-the probability density function for $f$ given by
+the probability density function for $X$ given by
 $f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-(\mu-x)^2 / (2 \sigma^2)}$
 
 <<>>=
@@ -551,35 +551,6 @@ legend(x = 0.0325, y = 100, col = c('purple', 'orange'), lty = 'dashed',
 
 @ 
 
-\section{Statistical Inference}
-Lastly, we investigate the cornerstone of statistical inference: the hypothesis test. \subsection{Hypothesis testing} \subsection{Confidence intervals}
-
-\section{Homework/Practice}
-\section{Problem \#0} 
-%% Write an R function which samples the elements from the following  table with
-%% their corresponding probabilities.
-%% \begin{table}
-%%   & A & B & C \\
-%%   \textrm{Probability} & 0.4 & 0.3 & 0.1
-%% \end{table}
-
-<<cache=T>>=
-
-MySample <- function(tbl, n) {
-    replicate(n, expr = {
-        cums <- cumsum(tbl)
-        coin <- runif(1)
-        if (all(coin < cums)) return(tbl[1])
-        if (all(coin > cums)) return (tbl[length(tbl)])
-        names(cums)[which.min(coin > cums)]
-    })
-}
-
-MySample(tbl = c("A" = 0.45, "B" = 0.25, "C" = 0.35), n = 10)
-
-@ 
-
- \section*{Problem \#1}  \paragraph{Question} A target is made of 3 concentric circles of radii $1/\sqrt{3}$, 1, and $\sqrt{3}$ feet. Shots within the inner circle are given 4 points, shots within the next ring are given 3 points, and shots within the third ring are given 2 points. Shouts outside the target are given 0 points.  Let $X$ denote the distance of the hit from the center (in feet), and let the p.d.f. of $X$ be  \[ f(x) = \frac{2}{\pi (1 + x^2)} \boldsymbol{1}\{x > 0\} \]  What is the expected value of the score of a single shot?  \paragraph{Solution} Using the definition of the expectation of a discrete-valued random variable, we have that  \begin{align*} \mathbb E[\text{single shot}] &= \sum_{x \in X} x \cdot \Pr(X = x) \\  &= 0 \cdot \Pr(X > \sqrt{3}) + 2 \cdot \Pr(1 < X < \sqrt{3}) + 3 \cdot \Pr(\frac{1}{\sqrt{2}} < X < 1) + 4 \cdot \Pr(X < \frac{1}{\sqrt{3}}) \end{align*}  The solution is simple once we solve for the c.d.f. of our random variable $X$. By definition,  \[ F(x) = \int_0^x f(x) dx = \int_0^x \frac{2}{\pi(1 + x^2)} dx \]  Recall that when $\sin \theta$ and $\cos \theta$ are defined using a unit circle, the $(x,y)$ point which lay on the unit circle is given by $(\cos \theta, \sin \theta)$, where $\theta$ denotes the angle from the origin.  Therefore, by the Pythagorean theorem, we have the identity that $\sin^2 \theta + \cos^2 \theta = 1$, since we can describe any point on the unit circle by a (possible degenerate) right triangle. We may then derive that  \begin{align*} \sin^2 \theta + \cos^2 \theta &= 1 \\ \frac{\sin^2 \theta}{\cos^2 \theta} + \frac{\cos^2\theta}{\cos^2 \theta} &= \frac{1}{\cos^2 \theta} \\ \tan^2 \theta + 1 &= \sec^2 \theta \end{align*}  This informs how we may use $u$-substitution to solve for our c.d.f. Let $x = \tan \theta$. Then,  \begin{align*} \frac{d}{d \theta} \tan \theta &= \frac{d}{d \theta} \frac{\sin \theta}{\cos \theta} \\  &= \frac{d}{d \theta} \sin \theta \cos^{-1} \theta \\  &= \frac{\cos \theta}{\cos \theta} + \frac{-\sin \theta}{\cos^2 \theta} \cdot (-\sin \theta) \\  &= \frac{\cos^2 \theta + \sin^2 \theta}{\cos^2 \theta} \\ &= \frac{1}{\cos^2 \theta} \\ &= \sec^2 \theta \end{align*}  If $x = \tan \theta$, then $\theta = \arctan x$, and further  \[ \frac{dx}{d\theta} = \sec^2 \theta \implies dx = \sec^2 \theta d \theta. \]  This is great because we can use $u$-substitution to reduce our integral to something very simple:  \[ \int \frac{1}{1 + x^2}dx = \int \frac{1}{\sec^2 \theta} \sec^2 \theta d\theta = \int d \theta = \theta + C \]  Therefore,  \begin{align*} \frac{2}{\pi} \int_0^x  \frac{1}{1+x^2}dx &= \frac{2}{\pi} \arctan x \bigg |_0^x = \frac{2}{\pi} \arctan x \end{align*}  Note that $\arctan 0 = 0$ and  $\underset{x \to \infty}{\lim} \arctan x \to \pi/2$, so that  $F(0) = 0$ and $\underset{x \to \infty}{\lim} F(x) \to 1$, which is how we expect our c.d.f. to behave for this random variable.  Now,  \begin{align*} \mathbb{E}[\text{single shot}] &= \sum_{x \in X} x \cdot \Pr(X = x) \\  &= 0 \cdot \Pr(X > \sqrt{3}) + 2 \cdot \Pr(1 < X < \sqrt{3}) + 3 \cdot \Pr(\frac{1}{\sqrt{2}} < X < 1) + 4 \cdot \Pr(X < \frac{1}{\sqrt{3}}) \\ &= 2 \bigg( F(\sqrt{3}) - F(1) \bigg) + 3 \bigg(F(1) - F(1/\sqrt{3}) \bigg) + 4 F(1/\sqrt{3}) \\ &\approx 3.403  \end{align*}  \section*{Problem \#2}   \paragraph{Question} Assume that the random variable $X$ has the exponential distribution  \[ f(x|\theta) = \theta e^{-\theta x} \boldsymbol{1}\{x > 0, \theta > 0\} \]  where $\theta$ is the parameter of the distribution. Use the method of maximum likelihood to estimate $\theta$ is 5 observations of $X$ are $x_1 = 0.9$, $x_2 = 1.7$, $x_3 = 0.4$, $x_4 = 0.3$, and $x_5 = 2.4$ are generated independent and identically distributed.  \paragraph{Answer} We are told that  \[ x_1, \ldots, x_n \overset{i.i.d.}{\sim} \textrm{exp} (\theta) \]  By independence, we have that  \[ f(x_1, \ldots, x_n | \theta_1, \ldots, \theta_n) = \prod_{i=1}^n f(x_i|\theta_i) \]  and by identically distributed, we have that  \[ \prod_{i=1}^n f(x_i) = \theta e^{-\theta x_i} \]  Therefore,  \[ f(x_1, \ldots, x_n|\theta) = \prod_{i=1}^n \theta e^{- \theta x_i} = \theta^n e^{-\theta \sum_i x_i} \]  Our likelihood function is given by  \[ L(\theta|x_1, \ldots, x_n) = \theta^n e^{-\theta \sum_i x_i}. \]  Maximizing a monotonic increasing transformation of the likelihood is the same as maximizing the likelihood, so to make life easier we take the log-likelihood:  \[ \lg L(\theta|x_1, \ldots, x_n) = n \lg \theta - \theta \sum_i x_i \]  Maximizing this by taking the derivative and setting it to zero shows that   \begin{align*} \frac{d}{d \theta} \lg L(\theta |x_1, \ldots, x_n) = \frac{n}{\theta} - \sum_i x_i &= 0 \\ \frac{n}{\theta} &= \sum_i x_i \\ \implies \hat{\theta}_{\text{mle}} &= \frac{n}{\sum_i x_i} \end{align*}  In other words, our maximum likelihood estimator for our parameter $\theta$ is simply the reciprocal of the sample mean. Note that we can convince ourselves that we have found a true maximum by taking the second derivative of our likelihood function and checking that it is concave, yielding  $\frac{d}{d \theta} \frac{n}{\theta} - \sum_i x_i = \frac{-n}{\theta^2}$, which is an upside down parabola and therefore has a single maximum point.  If $x = (0.9, 1.7, 0.4, 0.3, 2.4)$, then $\sum_i x_i = 5.7$, and $\bar{x} = 57/50 = 1.14$. Therefore, we see that  \[ \hat{\theta}_{\text{mle}} = \frac{1}{\bar{x}} = \frac{1}{1.14} \approx 0.877. \] 
 
 \bibliographystyle{plain}
 \begin{thebibliography}{10}
